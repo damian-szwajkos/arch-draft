@@ -1,0 +1,152 @@
+import type { Scenario } from '../../engine/types'
+import { COMPUTE_KINDS } from '../../engine/graph'
+import { diagram, kindIs } from './builder'
+
+export const shortener: Scenario = {
+  id: 'snip-shortener',
+  title: 'Snip: a URL shortener',
+  tagline: 'The classic warm-up: 100M redirects a day, sub-50 ms, click analytics on the side.',
+  industry: 'Web platform',
+  difficulty: 'beginner',
+  estMinutes: 15,
+  accent: '#6366f1',
+  concepts: ['caching', 'event-driven', 'modular-monolith', 'rate-limiting'],
+  story:
+    'Two engineers at a marketing-tech startup are building Snip, a branded link shortener for campaigns. Marketers create short links; millions of people click them in emails and social posts. Marketers want click analytics (country, device, referrer) in their dashboard.',
+  facts: [
+    { label: 'Redirects', value: '100M / day (~10k rps peak)' },
+    { label: 'New links', value: '1M / day' },
+    { label: 'Team', value: '2 engineers (Go)' },
+    { label: 'SLO', value: 'Redirect p99 < 50 ms' },
+  ],
+  functional: ['Create a short link for a long URL', 'Redirect visitors to the original URL', 'Record every click for analytics', 'Show click statistics to marketers'],
+  nonFunctional: ['Redirects are extremely read-heavy and latency-sensitive', 'Analytics may lag a minute behind', 'Link creation must be protected from abuse'],
+  constraints: ['Two engineers — keep it simple', 'Recording a click must never slow down the redirect'],
+  domains: [
+    { id: 'links', label: 'Links', description: 'Create and resolve short links' },
+    { id: 'analytics', label: 'Click analytics', description: 'Record and aggregate clicks' },
+  ],
+  recommendedStyles: ['modular-monolith', 'monolith', 'serverless'],
+  styleFeedback: {
+    'modular-monolith': 'Perfect for two engineers: one deployable with a Links module and an Analytics module.',
+    monolith: 'Fine for this size.',
+    serverless: 'Plausible: edge functions + a KV store make redirects fast and cheap. Keep click recording async.',
+    microservices: 'Two engineers, two capabilities — microservices would mostly add operational work.',
+    'event-driven': 'Events are great for clicks, but a full event-driven microservice landscape is overkill for two people.',
+  },
+  hints: [
+    'Redirect = key lookup. Put a cache in front of the store and most requests never hit the DB.',
+    'Do not write to the analytics store inside the redirect: emit a click event and let a worker batch-insert it.',
+    'Columnar OLAP stores (ClickHouse) aggregate billions of clicks per second.',
+  ],
+  checks: [
+    {
+      id: 'entry',
+      title: 'Traffic enters through a load balancer / gateway',
+      category: 'core',
+      why: 'At 10k rps you run several instances; something has to spread traffic and terminate TLS.',
+      hint: 'Clients → Load balancer (or API gateway / CDN) → app.',
+      test: (g) => {
+        const clients = g.ofKind('web-app', 'mobile-app')
+        if (!clients.length) return { pass: false, detail: 'No client drawn.' }
+        return !!g.reaches(clients, kindIs(...COMPUTE_KINDS), { through: ['load-balancer', 'api-gateway', 'cdn', 'waf'] }) &&
+          clients.some((c) => g.targets(c.id).some((t) => ['load-balancer', 'api-gateway', 'cdn', 'waf'].includes(t.kind)))
+      },
+    },
+    {
+      id: 'redirect-cache',
+      title: 'Redirect lookups hit a cache',
+      category: 'core',
+      why: 'A hot link may get 1M clicks in an hour. A cache in front of the store serves it from memory in microseconds.',
+      hint: 'Connect the Links owner to a Cache (Redis).',
+      concepts: ['caching'],
+      test: (g) => g.storesOf(g.ownerFamily('links'), ['cache']).length > 0,
+    },
+    {
+      id: 'durable-store',
+      title: 'Links stored durably',
+      category: 'core',
+      why: 'A cache is not a database. Links must survive restarts — a key-value or relational store works.',
+      hint: 'Links owner → Relational or Document/key-value database.',
+      test: (g) => g.storesOf(g.ownerFamily('links'), ['relational-db', 'document-db']).length > 0,
+    },
+    {
+      id: 'clicks-async',
+      title: 'Clicks recorded asynchronously',
+      category: 'core',
+      why: 'Writing analytics synchronously doubles redirect latency and couples availability. Emit an event and process it in the background.',
+      hint: 'Links → broker → analytics worker.',
+      concepts: ['event-driven'],
+      test: (g) => g.asyncFlow(g.ownerFamily('links'), [...g.ownerFamily('analytics'), ...g.ofKind('analytics-db')]),
+    },
+    {
+      id: 'olap',
+      title: 'Analytics in an OLAP store',
+      category: 'bonus',
+      why: '"Clicks per country per day" over billions of rows is an OLAP query. Columnar stores do it in milliseconds.',
+      hint: 'Analytics owner → Analytics store (ClickHouse).',
+      test: (g) => g.storesOf(g.ownerFamily('analytics'), ['analytics-db']).length > 0,
+    },
+    {
+      id: 'abuse',
+      title: 'Abuse protection on link creation',
+      category: 'bonus',
+      why: 'Shorteners attract spammers and phishing. Rate limiting and a WAF protect your domain reputation.',
+      hint: 'Add a WAF, or an API gateway with rate limiting.',
+      concepts: ['rate-limiting'],
+      test: (g) => g.has('waf') || g.ofKind('api-gateway').some((gw) => g.hasTrait(gw, 'rate-limiting')),
+    },
+    {
+      id: 'metrics',
+      title: 'Latency metrics',
+      category: 'bonus',
+      why: 'You promised p99 < 50 ms — you need a histogram to prove it.',
+      hint: 'Add a Metrics store.',
+      concepts: ['slo'],
+      test: (g) => g.has('metrics'),
+    },
+  ],
+  reference: {
+    decisions: {
+      style: 'modular-monolith',
+      communication: 'hybrid',
+      data: 'per-service',
+      stack: { frontend: 'react', backend: 'go', database: 'postgres', messaging: 'sqs', cache: 'redis' },
+      rationale: 'One Go binary, two modules. Redis in front of PostgreSQL for redirects; clicks go through SQS into ClickHouse.',
+    },
+    walkthrough: [
+      'Cloudflare WAF filters abuse; NGINX balances across stateless Go instances.',
+      'The Links module resolves codes via Redis (cache-aside) backed by PostgreSQL. IDs are base62 of a sequence.',
+      'Each redirect enqueues a click message to SQS (fire-and-forget) and returns 301/302 immediately.',
+      'A click ingestor worker batch-inserts into ClickHouse; the Analytics module queries it for dashboards.',
+    ],
+    diagram: diagram(
+      [
+        ['web', 'web-app', 'Dashboard & Visitors', 0, 160, { tech: 'react' }],
+        ['waf', 'waf', 'WAF', 260, 160, { tech: 'cloudflare' }],
+        ['lb', 'load-balancer', 'Load Balancer', 520, 160, { tech: 'nginx' }],
+        ['app', 'monolith', 'Snip App', 780, 60, { tech: 'go', w: 440, h: 220 }],
+        ['links', 'module', 'Links', 30, 70, { parent: 'app', tech: 'go', domains: ['links'] }],
+        ['analytics', 'module', 'Analytics', 230, 70, { parent: 'app', tech: 'go', domains: ['analytics'] }],
+        ['redis', 'cache', 'Link Cache', 1320, -20, { tech: 'redis' }],
+        ['pg', 'relational-db', 'Links DB', 1320, 100, { tech: 'postgres' }],
+        ['sqs', 'broker', 'Click Queue', 780, 380, { tech: 'sqs' }],
+        ['ingest', 'worker', 'Click Ingestor', 1040, 380, { tech: 'go', domains: ['analytics'] }],
+        ['ch', 'analytics-db', 'Click Analytics', 1320, 300, { tech: 'clickhouse' }],
+        ['metrics', 'metrics', 'Metrics', 520, 380, { tech: 'prometheus' }],
+      ],
+      [
+        ['web', 'waf'],
+        ['waf', 'lb'],
+        ['lb', 'app'],
+        ['links', 'redis'],
+        ['links', 'pg'],
+        ['links', 'sqs', 'event', 'ClickRecorded'],
+        ['sqs', 'ingest', 'event'],
+        ['ingest', 'ch'],
+        ['analytics', 'ch'],
+        ['app', 'metrics', 'telemetry'],
+      ],
+    ),
+  },
+}
