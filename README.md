@@ -1,6 +1,6 @@
 # ArchDraft
 
-**Learn software architecture by drawing it.**
+**Learn software architecture by drawing it.** · [Open ArchDraft](https://damian-szwajkos.github.io/arch-draft/)
 
 ArchDraft is a free, open, account-free learning platform for *application architecture*.
 Pick a real-world scenario — an online shop, a neobank ledger, a social feed, a flash-sale ticketing
@@ -62,8 +62,9 @@ src/
 ## Deployment
 
 The app is a static SPA. `.github/workflows/deploy-pages.yml` builds it with
-`BASE_PATH=/arch-draft/` and publishes to GitHub Pages (enable *Settings → Pages → Source: GitHub Actions*,
-then run the workflow). Any static host works: serve `dist/` with a fallback to `index.html`.
+`BASE_PATH=/arch-draft/` and publishes to GitHub Pages on every push to `main`
+(live at https://damian-szwajkos.github.io/arch-draft/). Any static host works: serve `dist/` with a
+fallback to `index.html`.
 
 ## Tech stack
 
