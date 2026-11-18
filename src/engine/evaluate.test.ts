@@ -87,3 +87,12 @@ describe('concept references', () => {
     expect(missing).toEqual([])
   })
 })
+
+describe('component details', () => {
+  it('reference existing concepts', async () => {
+    const { COMPONENT_DETAILS } = await import('../data/componentDetails')
+    const { CONCEPT_BY_ID } = await import('../data/concepts')
+    const missing = Object.entries(COMPONENT_DETAILS).flatMap(([k, d]) => (d.concepts ?? []).filter((c) => !CONCEPT_BY_ID[c]).map((c) => `${k}:${c}`))
+    expect(missing).toEqual([])
+  })
+})
