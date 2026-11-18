@@ -21,7 +21,7 @@ PostgreSQL or MongoDB, Redis…), record your decisions, and get an instant revi
   (e.g. Kafka is *replayable*, RabbitMQ is a *queue*, Redis supports *geo* and *TTL*).
 - **Decisions panel** — architecture style, communication, data strategy, stack preferences and an ADR rationale.
 - **Instant review** — key requirements, bonus points and anti-pattern detection (shared databases,
-  clients hitting the DB, long synchronous chains), a 0–100 score and 1–3 stars.
+  clients hitting the DB, long synchronous chains), and a 0–100 score.
 - **Reference solutions** with walkthroughs, loadable into your canvas.
 - **Concept library** — 33 patterns (saga, outbox, CDC, CQRS, fan-out, SLOs…) linked from every check.
 - **Sandbox** mode with architecture lint, PNG / JSON export and JSON import.
@@ -56,7 +56,7 @@ src/
 1. Create `src/data/scenarios/<name>.ts` exporting a `Scenario` (brief, capabilities, checks, reference).
 2. Write checks against the `Graph` API (`owners`, `ownerFamily`, `storesOf`, `asyncFlow`, `calls`, `hasTrait`…).
 3. Author the reference diagram with the `diagram()` helper and register it in `scenarios/index.ts`.
-4. Run `npm test` — the suite fails unless your reference solution scores 100 with 3 stars
+4. Run `npm test` — the suite fails unless your reference solution scores 100
    and an empty canvas fails.
 
 ## Deployment

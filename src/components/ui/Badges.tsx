@@ -1,4 +1,3 @@
-import { Star } from 'lucide-react'
 import type { Difficulty } from '../../engine/types'
 import { cn } from '../../lib/cn'
 
@@ -12,17 +11,6 @@ export function DifficultyBadge({ value, className }: { value: Difficulty; class
   return (
     <span className={cn('inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-semibold capitalize ring-1 ring-inset', DIFF[value], className)}>
       {value}
-    </span>
-  )
-}
-
-export function Stars({ value, size = 'sm' }: { value: number; size?: 'sm' | 'lg' }) {
-  const cls = size === 'lg' ? 'h-7 w-7' : 'h-3.5 w-3.5'
-  return (
-    <span className="inline-flex items-center gap-0.5" aria-label={`${value} of 3 stars`}>
-      {[1, 2, 3].map((i) => (
-        <Star key={i} className={cn(cls, i <= value ? 'fill-amber-400 text-amber-400' : 'fill-zinc-200 text-zinc-200 dark:fill-white/10 dark:text-white/10')} />
-      ))}
     </span>
   )
 }

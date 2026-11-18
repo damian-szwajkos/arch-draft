@@ -225,7 +225,7 @@ export function runChecks(checks: Check[], g: Graph): CheckResult[] {
   })
 }
 
-export function score(results: CheckResult[]): Pick<Evaluation, 'score' | 'stars' | 'passed'> {
+export function score(results: CheckResult[]): Pick<Evaluation, 'score' | 'passed'> {
   let possible = 0
   let earned = 0
   let penalty = 0
@@ -240,10 +240,8 @@ export function score(results: CheckResult[]): Pick<Evaluation, 'score' | 'stars
   const raw = possible ? (earned / possible) * 100 : 0
   const value = Math.max(0, Math.min(100, Math.round(raw - penalty)))
   const coreOk = results.filter((r) => r.category === 'core').every((r) => r.pass)
-  const antiOk = results.filter((r) => r.category === 'antipattern').every((r) => r.pass)
   const passed = coreOk && value >= 70
-  const stars: 0 | 1 | 2 | 3 = !passed ? 0 : value >= 90 && antiOk ? 3 : value >= 80 ? 2 : 1
-  return { score: value, stars, passed }
+  return { score: value, passed }
 }
 
 export function evaluateScenario(s: Scenario, diagram: Diagram, decisions: Decisions): Evaluation {

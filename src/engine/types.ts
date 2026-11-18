@@ -193,7 +193,6 @@ export interface LintIssue {
 
 export interface Evaluation {
   score: number
-  stars: 0 | 1 | 2 | 3
   passed: boolean
   results: CheckResult[]
   lint: LintIssue[]

@@ -28,7 +28,6 @@ export function removeKey(key: string) {
 
 export interface ProgressRecord {
   bestScore: number
-  stars: number
   passed: boolean
   attempts: number
   lastPlayed: number
@@ -40,12 +39,11 @@ export function getProgress(): Record<string, ProgressRecord> {
   return readJSON(PROGRESS_KEY, {})
 }
 
-export function recordAttempt(id: string, score: number, stars: number, passed: boolean) {
+export function recordAttempt(id: string, score: number, passed: boolean) {
   const all = getProgress()
   const prev = all[id]
   all[id] = {
     bestScore: Math.max(prev?.bestScore ?? 0, score),
-    stars: Math.max(prev?.stars ?? 0, stars),
     passed: (prev?.passed ?? false) || passed,
     attempts: (prev?.attempts ?? 0) + 1,
     lastPlayed: Date.now(),
@@ -57,6 +55,6 @@ export function recordAttempt(id: string, score: number, stars: number, passed: 
 export function touchScenario(id: string) {
   const all = getProgress()
   if (all[id]) all[id].lastPlayed = Date.now()
-  else all[id] = { bestScore: 0, stars: 0, passed: false, attempts: 0, lastPlayed: Date.now() }
+  else all[id] = { bestScore: 0, passed: false, attempts: 0, lastPlayed: Date.now() }
   writeJSON(PROGRESS_KEY, all)
 }

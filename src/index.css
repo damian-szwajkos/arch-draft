@@ -161,7 +161,7 @@ body {
   }
 }
 .marquee {
-  animation: marquee 40s linear infinite;
+  animation: marquee 90s linear infinite;
 }
 @media (prefers-reduced-motion: reduce) {
   .marquee {

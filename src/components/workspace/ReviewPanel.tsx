@@ -3,7 +3,6 @@ import { useState } from 'react'
 import type { CheckResult, Evaluation } from '../../engine/types'
 import { cn } from '../../lib/cn'
 import { useWorkspace } from '../../store/workspace'
-import { Stars } from '../ui/Badges'
 import { ConceptChip } from './ConceptDialog'
 
 function ScoreRing({ score, passed }: { score: number; passed: boolean }) {
@@ -147,7 +146,7 @@ export function ReviewPanel({
       ? `${antiFound} anti-pattern${antiFound > 1 ? 's' : ''} found`
       : 'No anti-patterns found'
     : evaluation.passed
-      ? evaluation.stars === 3
+      ? evaluation.score >= 90 && !antiFound
         ? 'Outstanding design!'
         : 'Design approved'
       : coreMissing
@@ -168,8 +167,7 @@ export function ReviewPanel({
         <div className="flex items-center gap-4">
           <ScoreRing score={evaluation.score} passed={evaluation.passed} />
           <div className="min-w-0">
-            <Stars value={evaluation.stars} size="lg" />
-            <p className="mt-1.5 text-[15px] font-semibold text-zinc-900 dark:text-white">{verdict}</p>
+            <p className="text-[15px] font-semibold text-zinc-900 dark:text-white">{verdict}</p>
             <p className="text-[12px] text-zinc-500 dark:text-zinc-400">{evaluation.passed ? 'Passed — 70+ and all key requirements met.' : 'Pass = 70+ and all key requirements met.'}</p>
           </div>
         </div>

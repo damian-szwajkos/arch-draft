@@ -17,7 +17,6 @@ export function ScenariosPage() {
   const [level, setLevel] = useState<Difficulty | 'all'>('all')
   const [industry, setIndustry] = useState('all')
   const done = SCENARIOS.filter((s) => progress[s.id]?.passed).length
-  const stars = SCENARIOS.reduce((a, s) => a + (progress[s.id]?.stars ?? 0), 0)
 
   const list = useMemo(() => {
     const term = q.trim().toLowerCase()
@@ -46,12 +45,6 @@ export function ScenariosPage() {
               <div className="text-[11px] font-semibold tracking-wide text-zinc-500 uppercase">Completed</div>
               <div className="text-lg font-semibold tabular-nums">
                 {done}<span className="text-zinc-400">/{SCENARIOS.length}</span>
-              </div>
-            </div>
-            <div className="rounded-xl border border-zinc-200/80 px-4 py-2.5 dark:border-white/10">
-              <div className="text-[11px] font-semibold tracking-wide text-zinc-500 uppercase">Stars</div>
-              <div className="text-lg font-semibold tabular-nums">
-                {stars}<span className="text-zinc-400">/{SCENARIOS.length * 3}</span>
               </div>
             </div>
           </div>

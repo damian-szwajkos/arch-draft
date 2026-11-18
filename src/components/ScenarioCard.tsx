@@ -2,7 +2,7 @@ import { Activity, ArrowRight, Clock, GraduationCap, Landmark, Link2, MessageCir
 import { Link } from 'react-router-dom'
 import type { Scenario } from '../engine/types'
 import type { ProgressRecord } from '../lib/storage'
-import { DifficultyBadge, Stars } from './ui/Badges'
+import { DifficultyBadge } from './ui/Badges'
 
 export const INDUSTRY_ICON: Record<string, LucideIcon> = {
   'E-commerce': ShoppingBag,
@@ -28,7 +28,7 @@ export function ScenarioCard({ s, progress }: { s: Scenario; progress?: Progress
           <Icon className="h-5 w-5" />
         </span>
         {status === 'done' ? (
-          <Stars value={progress!.stars} />
+          <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">Passed · {progress!.bestScore}</span>
         ) : status === 'attempted' ? (
           <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">Best {progress!.bestScore}</span>
         ) : status === 'started' ? (

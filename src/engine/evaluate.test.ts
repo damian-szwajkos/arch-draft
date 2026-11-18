@@ -6,18 +6,17 @@ import { evaluateScenario } from './evaluate'
 
 describe('scenario reference solutions', () => {
   for (const s of SCENARIOS) {
-    it(`${s.id}: reference passes with 3 stars`, () => {
+    it(`${s.id}: reference passes with a perfect score`, () => {
       const ev = evaluateScenario(s, s.reference.diagram, s.reference.decisions)
       const failed = ev.results.filter((r) => !r.pass).map((r) => `${r.category}:${r.id} ${r.detail ?? ''}`)
       expect(failed, failed.join('\n')).toEqual([])
       expect(ev.score).toBe(100)
-      expect(ev.stars).toBe(3)
+      expect(ev.passed).toBe(true)
     })
 
     it(`${s.id}: empty canvas fails`, () => {
       const ev = evaluateScenario(s, { nodes: [], edges: [] }, { stack: {} })
       expect(ev.passed).toBe(false)
-      expect(ev.stars).toBe(0)
     })
 
     it(`${s.id}: starter (if any) does not pass`, () => {

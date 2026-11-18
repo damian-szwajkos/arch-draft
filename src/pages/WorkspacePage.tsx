@@ -1,6 +1,7 @@
 import { getNodesBounds, getViewportForBounds, ReactFlowProvider, useReactFlow } from '@xyflow/react'
 import { toPng } from 'html-to-image'
 import {
+  CheckCircle2,
   ChevronRight,
   Download,
   FileJson,
@@ -26,7 +27,7 @@ import { Palette } from '../components/workspace/Palette'
 import { ReferenceDialog } from '../components/workspace/ReferenceDialog'
 import { ReviewPanel } from '../components/workspace/ReviewPanel'
 import { WorkspaceContext } from '../components/workspace/ScenarioContext'
-import { DifficultyBadge, Stars } from '../components/ui/Badges'
+import { DifficultyBadge } from '../components/ui/Badges'
 import { Modal } from '../components/ui/Modal'
 import { LogoMark } from '../components/ui/Logo'
 import { SCENARIO_BY_ID } from '../data/scenarios'
@@ -79,7 +80,7 @@ function Workspace({ scenario, storageKey }: { scenario?: Scenario; storageKey: 
   const [leftOpen, setLeftOpen] = useState(desktop || !!scenario)
   const [rightOpen, setRightOpen] = useState(desktop)
   const [refOpen, setRefOpen] = useState(false)
-  const [toast, setToast] = useState<{ title: string; body: string; stars?: number }>()
+  const [toast, setToast] = useState<{ title: string; body: string; success?: boolean }>()
   const [confirmReset, setConfirmReset] = useState(false)
   const leftTab = useWorkspace((s) => s.leftTab)
   const rightTab = useWorkspace((s) => s.rightTab)
@@ -144,8 +145,8 @@ function Workspace({ scenario, storageKey }: { scenario?: Scenario; storageKey: 
     s.setRightTab('review')
     setRightOpen(true)
     if (scenario) {
-      recordAttempt(scenario.id, ev.score, ev.stars, ev.passed)
-      if (ev.passed) setToast({ title: ev.stars === 3 ? 'Outstanding!' : 'Scenario passed', body: `You scored ${ev.score}/100.`, stars: ev.stars })
+      recordAttempt(scenario.id, ev.score, ev.passed)
+      if (ev.passed) setToast({ title: 'Scenario passed', body: `You scored ${ev.score}/100.`, success: true })
     }
   }
 
@@ -262,7 +263,7 @@ function Workspace({ scenario, storageKey }: { scenario?: Scenario; storageKey: 
           {toast && (
             <div className="pointer-events-none absolute inset-x-0 top-4 z-30 flex justify-center px-4">
               <div className="panel pointer-events-auto flex items-center gap-3 px-4 py-3">
-                {toast.stars !== undefined && <Stars value={toast.stars} />}
+                {toast.success && <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" />}
                 <div>
                   <p className="text-sm font-semibold text-zinc-900 dark:text-white">{toast.title}</p>
                   <p className="text-xs text-zinc-500">{toast.body}</p>

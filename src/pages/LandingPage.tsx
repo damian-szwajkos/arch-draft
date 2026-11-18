@@ -13,7 +13,6 @@ import {
   ScanSearch,
   Smartphone,
   Sparkles,
-  Star,
   Bell,
   TriangleAlert,
   type LucideIcon,
@@ -116,12 +115,8 @@ function HeroMock() {
         <div className="flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-full border-4 border-emerald-500/80 text-sm font-semibold text-white">92</div>
           <div>
-            <div className="flex gap-0.5">
-              {[0, 1, 2].map((i) => (
-                <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
-              ))}
-            </div>
-            <p className="mt-0.5 text-sm font-semibold text-white">Design approved</p>
+            <p className="text-sm font-semibold text-white">Design approved</p>
+            <p className="text-[11px] text-zinc-400">All key requirements met</p>
           </div>
         </div>
         <ul className="mt-3 space-y-1.5 text-[12px] text-zinc-300">

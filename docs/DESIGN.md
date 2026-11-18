@@ -19,7 +19,7 @@ these references informed layout and interaction decisions.
 | --- | --- | --- |
 | Blueprint cards with a one-line description and a meta line, search + filter chips | [Stripe Workbench blueprints](https://mobbin.com/screens/fc9452d5-d440-479e-8a1f-4a45998c582b) | Scenario cards: industry, title, tagline, difficulty · minutes · concepts. |
 | Course grid with search and filter chips | [Canva Design School](https://mobbin.com/screens/faa63178-3e85-4241-9597-8388bc3abf2d) | Difficulty chips and industry filter on the Scenarios page. |
-| Result screen with pass verdict, score and per-category bars | [Uxcel exam results](https://mobbin.com/screens/39bc6126-c7be-4b0c-93de-befbfbe12e40) | Review tab: score ring, stars, verdict and Requirements / Bonus / Anti-pattern bars. |
+| Result screen with pass verdict, score and per-category bars | [Uxcel exam results](https://mobbin.com/screens/39bc6126-c7be-4b0c-93de-befbfbe12e40) | Review tab: score ring, verdict and Requirements / Bonus / Anti-pattern bars. |
 
 ## Landing page
 
