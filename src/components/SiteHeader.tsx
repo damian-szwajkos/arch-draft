@@ -86,6 +86,16 @@ export function SiteFooter() {
           </a>
         </nav>
       </div>
+      <div className="mx-auto max-w-6xl px-4 pb-8 text-xs text-zinc-400 sm:px-6 dark:text-zinc-500">
+        Built alongside CloudDraft, KubeDraft and{' '}
+        <a
+          href="https://damian-szwajkos.github.io/pipe-draft/"
+          className="text-zinc-500 underline decoration-zinc-300 underline-offset-[3px] transition-colors hover:text-zinc-900 hover:decoration-current dark:text-zinc-400 dark:decoration-white/20 dark:hover:text-white"
+        >
+          PipeDraft
+        </a>
+        , a dry-run for Jenkins pipelines.
+      </div>
     </footer>
   )
 }
