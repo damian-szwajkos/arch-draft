@@ -1,4 +1,4 @@
-import { getNodesBounds, getViewportForBounds, ReactFlowProvider, useReactFlow } from '@xyflow/react'
+import { getViewportForBounds, ReactFlowProvider, useReactFlow } from '@xyflow/react'
 import { toPng } from 'html-to-image'
 import {
   CheckCircle2,
@@ -34,6 +34,8 @@ import { SCENARIO_BY_ID } from '../data/scenarios'
 import { evaluateSandbox, evaluateScenario } from '../engine/evaluate'
 import type { Decisions, Diagram, Evaluation, Scenario } from '../engine/types'
 import { cn } from '../lib/cn'
+import { ImportError, parseImport, summariseImport } from '../lib/importDiagram'
+import { shortcut } from '../lib/keys'
 import { readJSON, recordAttempt, touchScenario, writeJSON } from '../lib/storage'
 import { useTheme } from '../lib/theme'
 import { useWorkspace, type ArchNode, type RightTab } from '../store/workspace'
@@ -45,6 +47,19 @@ interface SavedWorkspace {
   decisions: Decisions
   evaluation?: Evaluation
   hintsRevealed?: number
+  /** The reference solution was loaded: checks no longer count towards progress. */
+  usedReference?: boolean
+}
+
+/** Saved state is user-controlled (and may predate schema changes): normalise it like an import. */
+function restoreSaved(saved: SavedWorkspace | null): { diagram: Diagram; decisions: Decisions } | undefined {
+  if (!saved?.diagram) return undefined
+  try {
+    const r = parseImport({ diagram: saved.diagram, decisions: saved.decisions })
+    return { diagram: r.diagram, decisions: r.decisions }
+  } catch {
+    return undefined
+  }
 }
 
 const EMPTY: Diagram = { nodes: [], edges: [] }
@@ -81,6 +96,21 @@ function Workspace({ scenario, storageKey }: { scenario?: Scenario; storageKey: 
   const [rightOpen, setRightOpen] = useState(desktop)
   const [refOpen, setRefOpen] = useState(false)
   const [toast, setToast] = useState<{ title: string; body: string; success?: boolean }>()
+  // Below the desktop breakpoint the side panels overlap the canvas, so only one may be open.
+  const openLeft = useCallback(
+    (open: boolean) => {
+      setLeftOpen(open)
+      if (open && !desktop) setRightOpen(false)
+    },
+    [desktop],
+  )
+  const openRight = useCallback(
+    (open: boolean) => {
+      setRightOpen(open)
+      if (open && !desktop) setLeftOpen(false)
+    },
+    [desktop],
+  )
   const [confirmReset, setConfirmReset] = useState(false)
   const leftTab = useWorkspace((s) => s.leftTab)
   const rightTab = useWorkspace((s) => s.rightTab)
@@ -91,10 +121,17 @@ function Workspace({ scenario, storageKey }: { scenario?: Scenario; storageKey: 
 
   // Load saved state (or scenario starter) before the canvas mounts.
   useEffect(() => {
-    const saved = readJSON<SavedWorkspace | null>(storageKey, null)
+    const raw = readJSON<SavedWorkspace | null>(storageKey, null)
+    const restored = restoreSaved(raw)
+    const saved = restored ? raw : null
     const ws = useWorkspace.getState()
-    ws.load(storageKey, saved?.diagram ?? scenario?.starter ?? EMPTY, saved?.decisions ?? scenario?.starterDecisions ?? { stack: {} })
-    if (saved?.evaluation) useWorkspace.setState({ evaluation: saved.evaluation, dirtySinceEval: false })
+    ws.load(
+      storageKey,
+      restored?.diagram ?? scenario?.starter ?? EMPTY,
+      restored?.decisions ?? scenario?.starterDecisions ?? { stack: {} },
+      !!saved?.usedReference,
+    )
+    if (saved?.evaluation && Array.isArray(saved.evaluation.results)) useWorkspace.setState({ evaluation: saved.evaluation, dirtySinceEval: false })
     setHints(saved?.hintsRevealed ?? 0)
     ws.setLeftTab(scenario ? (saved ? 'components' : 'brief') : 'components')
     ws.setRightTab(saved?.evaluation ? 'review' : 'decisions')
@@ -102,26 +139,53 @@ function Workspace({ scenario, storageKey }: { scenario?: Scenario; storageKey: 
     setReady(true)
   }, [storageKey, scenario])
 
-  // Persist (debounced) on every change.
+  // Persist (debounced) on every change; flush pending edits when leaving or hiding the page.
   const hintsRef = useRef(hints)
   hintsRef.current = hints
   const persist = useCallback(() => {
     const s = useWorkspace.getState()
     if (s.storageKey !== storageKey) return
-    writeJSON(storageKey, { version: 1, diagram: s.diagram(), decisions: s.decisions, evaluation: s.evaluation, hintsRevealed: hintsRef.current } satisfies SavedWorkspace)
+    writeJSON(storageKey, {
+      version: 1,
+      diagram: s.diagram(),
+      decisions: s.decisions,
+      evaluation: s.evaluation,
+      hintsRevealed: hintsRef.current,
+      ...(s.usedReference ? { usedReference: true } : {}),
+    } satisfies SavedWorkspace)
     setSavedAt(Date.now())
   }, [storageKey])
   useEffect(() => {
     if (!ready) return
     let t: number | undefined
-    const unsub = useWorkspace.subscribe((s, prev) => {
-      if (s.nodes === prev.nodes && s.edges === prev.edges && s.decisions === prev.decisions && s.evaluation === prev.evaluation) return
+    let pending = false
+    const flush = () => {
       window.clearTimeout(t)
-      t = window.setTimeout(persist, 400)
+      if (!pending) return
+      pending = false
+      persist()
+    }
+    const unsub = useWorkspace.subscribe((s, prev) => {
+      if (
+        s.nodes === prev.nodes &&
+        s.edges === prev.edges &&
+        s.decisions === prev.decisions &&
+        s.evaluation === prev.evaluation &&
+        s.usedReference === prev.usedReference
+      )
+        return
+      pending = true
+      window.clearTimeout(t)
+      t = window.setTimeout(flush, 400)
     })
+    const onVisibility = () => document.visibilityState === 'hidden' && flush()
+    window.addEventListener('pagehide', flush)
+    document.addEventListener('visibilitychange', onVisibility)
     return () => {
       unsub()
-      window.clearTimeout(t)
+      window.removeEventListener('pagehide', flush)
+      document.removeEventListener('visibilitychange', onVisibility)
+      flush()
     }
   }, [ready, persist])
   useEffect(() => {
@@ -130,8 +194,13 @@ function Workspace({ scenario, storageKey }: { scenario?: Scenario; storageKey: 
 
   // On mobile, open the inspector when something gets selected.
   useEffect(() => {
-    if (!desktop && anySelected && rightTab === 'inspect') setRightOpen(true)
-  }, [anySelected, desktop, rightTab])
+    if (!desktop && anySelected && rightTab === 'inspect') openRight(true)
+  }, [anySelected, desktop, rightTab, openRight])
+
+  // Shrinking the window below the desktop breakpoint with both panels open: keep only the right one.
+  useEffect(() => {
+    if (!desktop && leftOpen && rightOpen) setLeftOpen(false)
+  }, [desktop, leftOpen, rightOpen])
 
   const domainLabel = useMemo(() => {
     const map = new Map(scenario?.domains.map((d) => [d.id, d.label]))
@@ -143,8 +212,9 @@ function Workspace({ scenario, storageKey }: { scenario?: Scenario; storageKey: 
     const ev = scenario ? evaluateScenario(scenario, s.diagram(), s.decisions) : evaluateSandbox(s.diagram(), s.decisions)
     s.setEvaluation(ev)
     s.setRightTab('review')
-    setRightOpen(true)
-    if (scenario) {
+    openRight(true)
+    // A check of the loaded reference solution says nothing about the learner: don't record it.
+    if (scenario && !s.usedReference) {
       recordAttempt(scenario.id, ev.score, ev.passed)
       if (ev.passed) setToast({ title: 'Scenario passed', body: `You scored ${ev.score}/100.`, success: true })
     }
@@ -152,17 +222,13 @@ function Workspace({ scenario, storageKey }: { scenario?: Scenario; storageKey: 
 
   useEffect(() => {
     if (!toast) return
-    const t = window.setTimeout(() => setToast(undefined), 4500)
+    const t = window.setTimeout(() => setToast(undefined), Math.min(12000, Math.max(4500, toast.body.length * 60)))
     return () => window.clearTimeout(t)
   }, [toast])
 
   const loadReference = () => {
     if (!scenario) return
-    const s = useWorkspace.getState()
-    s.pushHistory()
-    const past = s.past
-    s.load(storageKey, scenario.reference.diagram, scenario.reference.decisions)
-    useWorkspace.setState({ past })
+    useWorkspace.getState().replaceDiagram(scenario.reference.diagram, scenario.reference.decisions, { usedReference: true })
     setRefOpen(false)
     setTimeout(() => fitView({ padding: 0.15, duration: 400 }), 50)
   }
@@ -178,8 +244,8 @@ function Workspace({ scenario, storageKey }: { scenario?: Scenario; storageKey: 
       <div className="flex h-dvh flex-col bg-[var(--canvas-bg)]">
         <TopBar
           scenario={scenario}
-          onToggleLeft={() => setLeftOpen((v) => !v)}
-          onToggleRight={() => setRightOpen((v) => !v)}
+          onToggleLeft={() => openLeft(!leftOpen)}
+          onToggleRight={() => openRight(!rightOpen)}
           leftOpen={leftOpen}
           rightOpen={rightOpen}
           onCheck={check}
@@ -188,10 +254,9 @@ function Workspace({ scenario, storageKey }: { scenario?: Scenario; storageKey: 
           onHint={() => {
             setHints((h) => Math.min((scenario?.hints.length ?? 0), h + 1))
             setLeftTab('brief')
-            setLeftOpen(true)
+            openLeft(true)
           }}
           onReference={scenario ? () => setRefOpen(true) : undefined}
-          storageKey={storageKey}
           onReset={() => setConfirmReset(true)}
           notify={(title, body) => setToast({ title, body })}
         />
@@ -260,17 +325,21 @@ function Workspace({ scenario, storageKey }: { scenario?: Scenario; storageKey: 
             </div>
           </aside>
 
-          {toast && (
-            <div className="pointer-events-none absolute inset-x-0 top-4 z-30 flex justify-center px-4">
-              <div className="panel pointer-events-auto flex items-center gap-3 px-4 py-3">
+          {/* Always mounted so screen readers pick up new messages in the live region. */}
+          <div role="status" aria-live="polite" className="pointer-events-none absolute inset-x-0 top-4 z-30 flex justify-center px-4">
+            {toast && (
+              <div className="panel pointer-events-auto flex max-w-md items-center gap-3 px-4 py-3">
                 {toast.success && <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" />}
-                <div>
+                <div className="min-w-0">
                   <p className="text-sm font-semibold text-zinc-900 dark:text-white">{toast.title}</p>
                   <p className="text-xs text-zinc-500">{toast.body}</p>
                 </div>
+                <button className="icon-btn -mr-1 shrink-0" onClick={() => setToast(undefined)} aria-label="Dismiss message">
+                  <X className="h-3.5 w-3.5" />
+                </button>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
       <Modal
@@ -278,7 +347,7 @@ function Workspace({ scenario, storageKey }: { scenario?: Scenario; storageKey: 
         onClose={() => setConfirmReset(false)}
         size="sm"
         title={scenario?.starter ? 'Reset to the starting point?' : 'Clear the canvas?'}
-        subtitle="Your diagram and decisions will be replaced. You can still undo with ⌘Z."
+        subtitle={`Your diagram and decisions will be replaced. You can still undo with ${shortcut('Z')}.`}
         footer={
           <>
             <button className="btn-secondary" onClick={() => setConfirmReset(false)}>
@@ -287,11 +356,7 @@ function Workspace({ scenario, storageKey }: { scenario?: Scenario; storageKey: 
             <button
               className="btn bg-rose-600 text-white hover:bg-rose-700"
               onClick={() => {
-                const s = useWorkspace.getState()
-                s.pushHistory()
-                const past = s.past
-                s.load(storageKey, scenario?.starter ?? EMPTY, scenario?.starterDecisions ?? { stack: {} })
-                useWorkspace.setState({ past })
+                useWorkspace.getState().replaceDiagram(scenario?.starter ?? EMPTY, scenario?.starterDecisions ?? { stack: {} }, { usedReference: false })
                 setConfirmReset(false)
                 setTimeout(() => fitView({ padding: 0.2, duration: 300 }), 50)
               }}
@@ -336,7 +401,6 @@ function TopBar({
   hintsLeft,
   onHint,
   onReference,
-  storageKey,
   onReset,
   notify,
 }: {
@@ -352,7 +416,6 @@ function TopBar({
   hintsLeft: number
   onHint: () => void
   onReference?: () => void
-  storageKey: string
 }) {
   const { isDark, toggle } = useTheme()
   return (
@@ -384,7 +447,7 @@ function TopBar({
             <span className="font-mono text-[11px] text-zinc-400">{hintsLeft}</span>
           </button>
         )}
-        <MoreMenu scenario={scenario} onReference={onReference} storageKey={storageKey} onReset={onReset} notify={notify} />
+        <MoreMenu scenario={scenario} onReference={onReference} onReset={onReset} notify={notify} onHint={scenario ? onHint : undefined} hintsLeft={hintsLeft} />
         <button className="icon-btn" onClick={toggle} title="Toggle theme" aria-label="Toggle theme">
           {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </button>
@@ -403,20 +466,23 @@ function TopBar({
 function MoreMenu({
   scenario,
   onReference,
-  storageKey,
   onReset,
   notify,
+  onHint,
+  hintsLeft,
 }: {
   scenario?: Scenario
   onReference?: () => void
-  storageKey: string
   onReset: () => void
   notify: (title: string, body: string) => void
+  /** Hint entry for small screens, where the top-bar Hint button is hidden. */
+  onHint?: () => void
+  hintsLeft: number
 }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
-  const { getNodes, fitView } = useReactFlow<ArchNode>()
+  const { getNodes, getNodesBounds, fitView } = useReactFlow<ArchNode>()
   useEffect(() => {
     if (!open) return
     const onDown = (e: MouseEvent) => !ref.current?.contains(e.target as Node) && setOpen(false)
@@ -441,28 +507,36 @@ function MoreMenu({
   const exportPng = async () => {
     const nodes = getNodes()
     if (!nodes.length) return notify('Nothing to export', 'Add some components first.')
+    // The instance method resolves child nodes' absolute positions (the standalone helper does not).
     const bounds = getNodesBounds(nodes)
     const w = Math.min(4000, Math.max(800, bounds.width + 160))
     const h = Math.min(4000, Math.max(500, bounds.height + 160))
     const vp = getViewportForBounds(bounds, w, h, 0.2, 2, 0.08)
     const el = document.querySelector<HTMLElement>('.react-flow__viewport')
-    if (!el) return
-    const bg = getComputedStyle(document.documentElement).getPropertyValue('--canvas-bg').trim() || '#ffffff'
-    const url = await toPng(el, { backgroundColor: bg, width: w, height: h, pixelRatio: 2, style: { width: `${w}px`, height: `${h}px`, transform: `translate(${vp.x}px, ${vp.y}px) scale(${vp.zoom})` } })
-    download(url, `archdraft-${name}.png`)
+    if (!el) return notify('Export failed', 'The canvas is not ready yet.')
+    try {
+      const bg = getComputedStyle(document.documentElement).getPropertyValue('--canvas-bg').trim() || '#ffffff'
+      const url = await toPng(el, { backgroundColor: bg, width: w, height: h, pixelRatio: 2, style: { width: `${w}px`, height: `${h}px`, transform: `translate(${vp.x}px, ${vp.y}px) scale(${vp.zoom})` } })
+      download(url, `archdraft-${name}.png`)
+    } catch (err) {
+      notify('Export failed', `Could not render the PNG${err instanceof Error && err.message ? `: ${err.message}` : '.'}`)
+    }
   }
   const importJson = async (file: File) => {
+    let data: unknown
     try {
-      const data = JSON.parse(await file.text())
-      if (!data?.diagram?.nodes || !Array.isArray(data.diagram.nodes) || !Array.isArray(data.diagram.edges)) throw new Error('Not an ArchDraft file')
-      const s = useWorkspace.getState()
-      s.pushHistory()
-      const past = s.past
-      s.load(storageKey, data.diagram, data.decisions ?? { stack: {} })
-      useWorkspace.setState({ past })
+      data = JSON.parse(await file.text())
+    } catch {
+      return notify('Import failed', 'The file is not valid JSON.')
+    }
+    try {
+      const result = parseImport(data, scenario?.id ?? null)
+      useWorkspace.getState().replaceDiagram(result.diagram, result.decisions, { usedReference: false })
       setTimeout(() => fitView({ padding: 0.2, duration: 300 }), 50)
+      const clean = !result.skipped.length && !result.warnings.length
+      notify(clean ? 'Diagram imported' : 'Imported with warnings', `${summariseImport(result)} Undo with ${shortcut('Z')}.`)
     } catch (err) {
-      notify('Import failed', (err as Error).message)
+      notify('Import failed', err instanceof ImportError ? err.message : 'The file could not be read as an ArchDraft diagram.')
     }
   }
   const item = 'flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[13px] text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-white/10'
@@ -473,6 +547,12 @@ function MoreMenu({
       </button>
       {open && (
         <div className="panel absolute top-10 right-0 z-40 w-56 p-1.5" role="menu" onClick={() => setOpen(false)}>
+          {onHint && (
+            <button className={cn(item, 'disabled:opacity-50 sm:hidden')} onClick={onHint} disabled={hintsLeft === 0} role="menuitem">
+              <Lightbulb className="h-4 w-4 text-amber-500" /> Reveal a hint
+              <span className="ml-auto font-mono text-[11px] text-zinc-400">{hintsLeft}</span>
+            </button>
+          )}
           {onReference && (
             <button className={item} onClick={onReference} role="menuitem">
               <Lightbulb className="h-4 w-4" /> Reference solution

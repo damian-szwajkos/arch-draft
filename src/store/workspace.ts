@@ -29,9 +29,14 @@ export type ArchEdge = Edge<EdgeData>
 export type RightTab = 'inspect' | 'decisions' | 'review'
 export type LeftTab = 'brief' | 'components'
 
-interface Snapshot {
+interface FlowSnapshot {
   nodes: ArchNode[]
   edges: ArchEdge[]
+}
+
+/** One undo step: the canvas plus the architecture decisions. */
+interface Snapshot extends FlowSnapshot {
+  decisions: Decisions
 }
 
 export const CONTAINER_SIZE: Partial<Record<ComponentKind, { width: number; height: number }>> = {
@@ -56,7 +61,7 @@ function sortNodes(nodes: ArchNode[]) {
   return [...containers, ...others]
 }
 
-export function diagramToFlow(d: Diagram): Snapshot {
+export function diagramToFlow(d: Diagram): FlowSnapshot {
   const nodes: ArchNode[] = d.nodes.map((n) => {
     const size = CONTAINER_SIZE[n.kind]
     return {
@@ -109,6 +114,12 @@ const uid = (prefix: string) => `${prefix}-${Date.now().toString(36)}-${(idCount
 
 const EMPTY_DECISIONS: Decisions = { stack: {} }
 
+/** Window in which consecutive coalesced edits (typing, toggling) share one undo step. */
+const COALESCE_MS = 800
+
+/** True while a container resize gesture is in progress (history is pushed once at its start). */
+let resizing = false
+
 interface WorkspaceState {
   storageKey: string
   nodes: ArchNode[]
@@ -121,8 +132,12 @@ interface WorkspaceState {
   leftTab: LeftTab
   dirtySinceEval: boolean
   lastHistoryPush: number
+  /** The reference solution was loaded into this workspace: scores are not recorded. */
+  usedReference: boolean
 
-  load: (key: string, diagram: Diagram, decisions?: Decisions) => void
+  load: (key: string, diagram: Diagram, decisions?: Decisions, usedReference?: boolean) => void
+  /** Swap the whole diagram + decisions as ONE undoable step (reset, import, load reference). */
+  replaceDiagram: (diagram: Diagram, decisions: Decisions, opts?: { usedReference?: boolean }) => void
   onNodesChange: (changes: NodeChange<ArchNode>[]) => void
   onEdgesChange: (changes: EdgeChange<ArchEdge>[]) => void
   onConnect: (c: Connection) => void
@@ -133,6 +148,8 @@ interface WorkspaceState {
   removeElements: (ids: string[]) => void
   duplicateNode: (id: string) => void
   setParent: (id: string, parentId: string | undefined, position: XYPosition) => void
+  /** Re-parent several nodes in a single update (multi-node drag into / out of containers). */
+  setParents: (updates: { id: string; parentId: string | undefined; position: XYPosition }[]) => void
   setDecisions: (patch: Partial<Decisions>) => void
   applyStack: () => number
   setEvaluation: (e?: Evaluation) => void
@@ -157,9 +174,11 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
   leftTab: 'brief',
   dirtySinceEval: true,
   lastHistoryPush: 0,
+  usedReference: false,
 
-  load: (key, diagram, decisions) => {
+  load: (key, diagram, decisions, usedReference = false) => {
     const flow = diagramToFlow(diagram)
+    resizing = false
     set({
       storageKey: key,
       nodes: flow.nodes,
@@ -169,35 +188,76 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
       past: [],
       future: [],
       dirtySinceEval: true,
+      lastHistoryPush: 0,
+      usedReference,
+    })
+  },
+
+  replaceDiagram: (diagram, decisions, opts) => {
+    get().pushHistory()
+    const flow = diagramToFlow(diagram)
+    set({
+      nodes: flow.nodes,
+      edges: flow.edges,
+      decisions: { ...decisions, stack: { ...(decisions.stack ?? {}) } },
+      evaluation: undefined,
+      dirtySinceEval: true,
+      // The next edit must start a fresh undo step rather than coalesce into this one.
+      lastHistoryPush: 0,
+      ...(opts?.usedReference !== undefined ? { usedReference: opts.usedReference } : {}),
     })
   },
 
   pushHistory: (coalesce = false) => {
     const now = Date.now()
-    const { nodes, edges, past, lastHistoryPush } = get()
-    if (coalesce && now - lastHistoryPush < 800) return
-    set({ past: [...past.slice(-49), { nodes, edges }], future: [], lastHistoryPush: now })
+    const { nodes, edges, decisions, past, future, lastHistoryPush } = get()
+    // Never coalesce right after an undo: the edit must still discard the redo stack.
+    if (coalesce && future.length === 0 && now - lastHistoryPush < COALESCE_MS) return
+    set({ past: [...past.slice(-49), { nodes, edges, decisions }], future: [], lastHistoryPush: now })
   },
 
   undo: () => {
-    const { past, nodes, edges, future } = get()
+    const { past, nodes, edges, decisions, future } = get()
     const prev = past[past.length - 1]
     if (!prev) return
-    set({ nodes: prev.nodes, edges: prev.edges, past: past.slice(0, -1), future: [{ nodes, edges }, ...future], dirtySinceEval: true })
+    set({
+      nodes: prev.nodes,
+      edges: prev.edges,
+      decisions: prev.decisions,
+      past: past.slice(0, -1),
+      future: [{ nodes, edges, decisions }, ...future],
+      dirtySinceEval: true,
+      lastHistoryPush: 0,
+    })
   },
 
   redo: () => {
-    const { past, nodes, edges, future } = get()
+    const { past, nodes, edges, decisions, future } = get()
     const next = future[0]
     if (!next) return
-    set({ nodes: next.nodes, edges: next.edges, future: future.slice(1), past: [...past, { nodes, edges }], dirtySinceEval: true })
+    set({
+      nodes: next.nodes,
+      edges: next.edges,
+      decisions: next.decisions,
+      future: future.slice(1),
+      past: [...past, { nodes, edges, decisions }],
+      dirtySinceEval: true,
+      lastHistoryPush: 0,
+    })
   },
 
+  // Removals from React Flow (keyboard delete) are recorded once in the canvas's onBeforeDelete,
+  // so a node and its connected edges are a single undo step.
   onNodesChange: (changes) => {
     const structural = changes.some((c) => c.type === 'remove' || c.type === 'add')
     const dragEnd = changes.some((c) => c.type === 'position' && c.dragging === false)
+    const resizeStart = changes.some((c) => c.type === 'dimensions' && c.resizing === true)
     const resizeEnd = changes.some((c) => c.type === 'dimensions' && c.resizing === false)
-    if (structural) get().pushHistory()
+    if (resizeStart && !resizing) {
+      resizing = true
+      get().pushHistory()
+    }
+    if (resizeEnd) resizing = false
     const nodes = applyNodeChanges(changes, get().nodes)
     const meaningful = structural || dragEnd || resizeEnd || changes.some((c) => c.type === 'position')
     set({ nodes, ...(meaningful ? { dirtySinceEval: true } : {}) })
@@ -208,9 +268,9 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
   },
 
   onEdgesChange: (changes) => {
-    if (changes.some((c) => c.type === 'remove')) get().pushHistory()
     const edges = applyEdgeChanges(changes, get().edges)
-    set({ edges, dirtySinceEval: true })
+    const meaningful = changes.some((c) => c.type !== 'select')
+    set({ edges, ...(meaningful ? { dirtySinceEval: true } : {}) })
     if (changes.some((c) => c.type === 'select' && c.selected) && get().rightTab !== 'inspect') set({ rightTab: 'inspect' })
   },
 
@@ -312,14 +372,26 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
     set({ nodes: sortNodes([...get().nodes.map((x) => ({ ...x, selected: false })), copy]), dirtySinceEval: true })
   },
 
-  setParent: (id, parentId, position) => {
+  setParent: (id, parentId, position) => get().setParents([{ id, parentId, position }]),
+
+  setParents: (updates) => {
+    if (!updates.length) return
+    const byId = new Map(updates.map((u) => [u.id, u]))
     set({
-      nodes: sortNodes(get().nodes.map((n) => (n.id === id ? { ...n, parentId, position, extent: undefined } : n))),
+      nodes: sortNodes(
+        get().nodes.map((n) => {
+          const u = byId.get(n.id)
+          return u ? { ...n, parentId: u.parentId, position: u.position, extent: undefined } : n
+        }),
+      ),
       dirtySinceEval: true,
     })
   },
 
-  setDecisions: (patch) => set({ decisions: { ...get().decisions, ...patch }, dirtySinceEval: true }),
+  setDecisions: (patch) => {
+    get().pushHistory(true)
+    set({ decisions: { ...get().decisions, ...patch }, dirtySinceEval: true })
+  },
 
   applyStack: () => {
     get().pushHistory()

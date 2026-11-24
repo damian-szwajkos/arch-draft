@@ -4,13 +4,22 @@ import { Link, useParams } from 'react-router-dom'
 import { ConceptBody } from '../components/workspace/ConceptDialog'
 import { SiteFooter, SiteHeader } from '../components/SiteHeader'
 import { CONCEPT_BY_ID, CONCEPT_GROUPS, CONCEPTS } from '../data/concepts'
+import { conceptExampleNames } from '../data/conceptExamples'
 import { NotFound } from './NotFound'
+
+const HAYSTACK: Record<string, string> = Object.fromEntries(
+  CONCEPTS.map((c) => [
+    c.id,
+    [c.title, c.summary, c.group, ...c.body, ...c.useWhen, ...c.pitfalls, ...conceptExampleNames(c.id)].join(' ').toLowerCase(),
+  ]),
+)
 
 export function ConceptsPage() {
   const [q, setQ] = useState('')
   const filtered = useMemo(() => {
     const t = q.trim().toLowerCase()
-    return t ? CONCEPTS.filter((c) => [c.title, c.summary, c.group].join(' ').toLowerCase().includes(t)) : CONCEPTS
+    if (!t) return CONCEPTS
+    return CONCEPTS.filter((c) => HAYSTACK[c.id].includes(t))
   }, [q])
   return (
     <div className="flex min-h-dvh flex-col">
@@ -24,6 +33,14 @@ export function ConceptsPage() {
           <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-zinc-400" />
           <input className="input pl-9" placeholder="Search concepts" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Search concepts" />
         </label>
+        {filtered.length === 0 && (
+          <div className="mt-10 flex flex-wrap items-center gap-3 rounded-2xl border border-dashed border-zinc-200 p-6 text-sm text-zinc-500 dark:border-white/10 dark:text-zinc-400">
+            <span>No concepts match “{q.trim()}”.</span>
+            <button className="btn-secondary px-2.5 py-1 text-xs" onClick={() => setQ('')}>
+              Clear
+            </button>
+          </div>
+        )}
         {CONCEPT_GROUPS.map((g) => {
           const items = filtered.filter((c) => c.group === g)
           if (!items.length) return null

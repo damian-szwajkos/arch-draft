@@ -5,6 +5,7 @@ import { STYLE_NAMES } from '../../engine/evaluate'
 import type { Scenario } from '../../engine/types'
 import { TECH_BY_ID, STACK_SLOTS } from '../../data/tech'
 import { diagramToFlow } from '../../store/workspace'
+import { shortcut } from '../../lib/keys'
 import { edgeTypes, nodeTypes } from '../canvas/Canvas'
 import { Modal } from '../ui/Modal'
 
@@ -36,7 +37,7 @@ export function ReferenceDialog({
       footer={
         show && (
           <>
-            {armed && <span className="mr-auto text-xs text-zinc-500">This replaces your current diagram (undo with ⌘Z).</span>}
+            {armed && <span className="mr-auto text-xs text-zinc-500">This replaces your current diagram (undo with {shortcut('Z')}).</span>}
             <button
               className={armed ? 'btn bg-rose-600 text-white hover:bg-rose-700' : 'btn-secondary'}
               onClick={() => {
@@ -62,7 +63,7 @@ export function ReferenceDialog({
           </div>
           <p className="text-base font-semibold text-zinc-900 dark:text-white">Spoiler ahead</p>
           <p className="mt-1 max-w-sm text-sm text-zinc-500 dark:text-zinc-400">
-            You learn far more by attempting the design first. Run <b>Check my design</b> at least once — or peek anyway.
+            You learn far more by attempting the design first. Run <b>Check design</b> at least once — or peek anyway.
           </p>
           <button className="btn-secondary mt-5" onClick={() => setRevealed(true)}>
             Show me anyway

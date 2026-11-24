@@ -1,4 +1,4 @@
-import { CheckCircle2, Circle, Clock, Lightbulb } from 'lucide-react'
+import { CheckCircle2, Circle, Clock, ExternalLink, Lightbulb } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import type { Scenario } from '../../engine/types'
 import { cn } from '../../lib/cn'
@@ -83,6 +83,26 @@ export function BriefPanel({ scenario, hintsRevealed, onRevealHint }: { scenario
       <Section title="Constraints">
         <Bullets items={scenario.constraints} tone="amber" />
       </Section>
+      {scenario.inspiration && scenario.inspiration.length > 0 && (
+        <Section title="Inspired by real systems">
+          <ul className="space-y-1.5">
+            {scenario.inspiration.map((i) => (
+              <li key={i.url}>
+                <a
+                  href={i.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group flex items-start gap-2 rounded-lg text-[13px] leading-snug text-zinc-600 hover:text-brand-700 dark:text-zinc-400 dark:hover:text-brand-300"
+                >
+                  <ExternalLink className="mt-0.5 h-3.5 w-3.5 shrink-0 text-zinc-400 group-hover:text-brand-500" />
+                  <span>{i.label}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 text-[11px] leading-snug text-zinc-500">The company in the story is fictional; the problem is modelled on these public engineering write-ups.</p>
+        </Section>
+      )}
       <Section title="Concepts in play">
         <div className="flex flex-wrap gap-1.5">
           {scenario.concepts.map((c) => (

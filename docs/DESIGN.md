@@ -36,3 +36,17 @@ these references informed layout and interaction decisions.
   data access is emerald, telemetry is dotted rose.
 - **Typography** — Inter for UI, JetBrains Mono for protocol labels and numbers.
 - **Light and dark themes** — follows the OS by default, toggle in the header.
+
+## Logo
+
+The mark is a **drafted arch**: one confident arch stroke crossed by a thin construction line that overshoots
+both legs, the way architects mark intersections when drafting by hand. It reads three ways at once — an
+architectural arch (*Arch*), a drafting gesture (*Draft*) and a rounded capital **A**.
+
+- **Tile** — rounded square (rx 8 on a 32 grid), diagonal gradient brand-500 `#6366f1` → brand-700 `#4338ca`.
+- **Arch** — white, 2.75 stroke, butt caps; **construction line** — brand-200 `#c7d2fe`, 1.5 stroke, round caps.
+- **Wordmark** — Inter 600, tight tracking: "Arch" in zinc-900 (white on dark) and "Draft" in brand-600
+  (brand-300 on dark).
+- Chosen from five concepts (node-graph "A", drafted arch, stacked tiers, negative-space arch, drafting cursor)
+  rendered at 16–128 px on light and dark backgrounds and scored by three independent reviews for small-size
+  legibility, elegance, meaning and originality. Sources: `src/components/ui/Logo.tsx`, `public/favicon.svg`.

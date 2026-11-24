@@ -16,6 +16,7 @@ export type ComponentKind =
   // clients
   | 'web-app'
   | 'mobile-app'
+  | 'device'
   // edge
   | 'cdn'
   | 'load-balancer'
@@ -165,6 +166,8 @@ export interface Scenario {
   styleFeedback: Partial<Record<ArchStyle, string>>
   hints: string[]
   checks: Check[]
+  /** Public engineering write-ups the scenario is modelled on. */
+  inspiration?: { label: string; url: string }[]
   starter?: Diagram
   starterDecisions?: Decisions
   reference: {

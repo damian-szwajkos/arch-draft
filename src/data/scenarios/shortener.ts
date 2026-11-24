@@ -47,10 +47,9 @@ export const shortener: Scenario = {
       why: 'At 10k rps you run several instances; something has to spread traffic and terminate TLS.',
       hint: 'Clients → Load balancer (or API gateway / CDN) → app.',
       test: (g) => {
-        const clients = g.ofKind('web-app', 'mobile-app')
-        if (!clients.length) return { pass: false, detail: 'No client drawn.' }
-        return !!g.reaches(clients, kindIs(...COMPUTE_KINDS), { through: ['load-balancer', 'api-gateway', 'cdn', 'waf'] }) &&
-          clients.some((c) => g.targets(c.id).some((t) => ['load-balancer', 'api-gateway', 'cdn', 'waf'].includes(t.kind)))
+        const entry = g.clientsEnterThrough(['load-balancer', 'api-gateway'])
+        if (!entry.pass) return entry
+        return !!g.reaches(g.ofKind('web-app', 'mobile-app'), kindIs(...COMPUTE_KINDS), { through: ['load-balancer', 'api-gateway', 'cdn', 'waf'] })
       },
     },
     {
@@ -125,9 +124,9 @@ export const shortener: Scenario = {
         ['web', 'web-app', 'Dashboard & Visitors', 0, 160, { tech: 'react' }],
         ['waf', 'waf', 'WAF', 260, 160, { tech: 'cloudflare' }],
         ['lb', 'load-balancer', 'Load Balancer', 520, 160, { tech: 'nginx' }],
-        ['app', 'monolith', 'Snip App', 780, 60, { tech: 'go', w: 440, h: 220 }],
-        ['links', 'module', 'Links', 30, 70, { parent: 'app', tech: 'go', domains: ['links'] }],
-        ['analytics', 'module', 'Analytics', 230, 70, { parent: 'app', tech: 'go', domains: ['analytics'] }],
+        ['app', 'monolith', 'Snip App', 780, 60, { tech: 'go', w: 480, h: 220 }],
+        ['links', 'module', 'Links', 20, 70, { parent: 'app', tech: 'go', domains: ['links'] }],
+        ['analytics', 'module', 'Analytics', 260, 70, { parent: 'app', tech: 'go', domains: ['analytics'] }],
         ['redis', 'cache', 'Link Cache', 1320, -20, { tech: 'redis' }],
         ['pg', 'relational-db', 'Links DB', 1320, 100, { tech: 'postgres' }],
         ['sqs', 'broker', 'Click Queue', 780, 380, { tech: 'sqs' }],

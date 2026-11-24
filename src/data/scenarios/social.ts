@@ -1,5 +1,4 @@
 import type { Scenario } from '../../engine/types'
-import { CLIENT_KINDS } from '../../engine/graph'
 import { diagram, ecosystemShare, external, observability, PUSH } from './builder'
 
 export const social: Scenario = {
@@ -66,11 +65,7 @@ export const social: Scenario = {
       why: 'A single entry point terminates TLS, authenticates, rate-limits and routes to many services.',
       hint: 'Connect Web/Mobile apps to an API gateway (or BFF / load balancer).',
       concepts: ['api-gateway'],
-      test: (g) => {
-        const clients = g.ofKind(...CLIENT_KINDS)
-        if (!clients.length) return { pass: false, detail: 'No clients on the canvas.' }
-        return clients.every((c) => g.targets(c.id).some((t) => ['api-gateway', 'load-balancer', 'bff'].includes(t.kind)))
-      },
+      test: (g) => g.clientsEnterThrough(['api-gateway', 'load-balancer', 'bff']),
     },
     {
       id: 'media-cdn',

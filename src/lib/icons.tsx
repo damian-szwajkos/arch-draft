@@ -1,5 +1,5 @@
 import {
-  Activity, Archive, BarChart3, BellRing, Box, Cog, Database, FileJson, Gauge, Globe, KeyRound,
+  Activity, Archive, BarChart3, BellRing, Box, Cog, Cpu, Database, FileJson, Gauge, Globe, KeyRound,
   LayoutDashboard, Layers, Lock, MemoryStick, Monitor, Package, Plug, Puzzle, Radio, RefreshCw, Router,
   Rows3, Rss, Satellite, ScrollText, Search, Share2, Shield, Smartphone, Split, SquareDashed, StickyNote,
   Workflow, Zap, Route, type LucideIcon,
@@ -9,6 +9,7 @@ import type { ComponentKind } from '../engine/types'
 export const KIND_ICON: Record<ComponentKind, LucideIcon> = {
   'web-app': Monitor,
   'mobile-app': Smartphone,
+  device: Cpu,
   cdn: Globe,
   'load-balancer': Split,
   'api-gateway': Router,

@@ -172,10 +172,14 @@ export class Graph {
   /**
    * Asynchronous flow from any of `from` to any of `to`: a path that passes
    * through at least one broker (optionally via an outbox table + CDC relay).
+   * Once a broker has been crossed, consumers acting as plumbing (workers,
+   * functions, orchestrators, stream processors) may relay the flow onward, and
+   * a component may consume its own events (e.g. a monolith draining its queue).
    */
   asyncFlow(from: DiagramNode[], to: DiagramNode[]): boolean {
     const toIds = new Set(to.map((t) => t.id))
     const through: ComponentKind[] = [...MESSAGING_KINDS, ...DB_KINDS]
+    const relays: ComponentKind[] = ['worker', 'function', 'orchestrator', 'stream-processor']
     // Search from each source, tracking whether a broker was crossed.
     for (const start of from) {
       const queue: { id: string; viaBroker: boolean; depth: number }[] = [
@@ -189,8 +193,8 @@ export class Graph {
           const t = this.byId.get(e.target)
           if (!t) continue
           const viaBroker = cur.viaBroker || t.kind === 'broker' || t.kind === 'cdc'
-          if (toIds.has(t.id) && viaBroker && t.id !== start.id) return true
-          if (!through.includes(t.kind)) continue
+          if (toIds.has(t.id) && viaBroker) return true
+          if (!through.includes(t.kind) && !(viaBroker && relays.includes(t.kind))) continue
           const key = `${t.id}:${viaBroker}`
           if (seen.has(key)) continue
           seen.add(key)
@@ -230,15 +234,20 @@ export class Graph {
     return result
   }
 
-  /** Longest chain of synchronous calls between compute nodes. */
+  /**
+   * Longest chain of synchronous calls between compute nodes. Calls between
+   * modules of the same deployable are in-process, so they are not network hops.
+   */
   longestSyncChain(): DiagramNode[] {
     const compute = new Set(this.ofKind('service', 'function', 'bff', 'monolith', 'module').map((n) => n.id))
     let best: string[] = []
     const dfs = (id: string, path: string[]) => {
       if (path.length > best.length) best = [...path]
       if (path.length > 12) return
+      const unit = this.deployable(this.byId.get(id)!).id
       for (const e of this.out(id, SYNC_PROTOCOLS)) {
         if (!compute.has(e.target) || path.includes(e.target)) continue
+        if (this.deployable(this.byId.get(e.target)!).id === unit) continue
         dfs(e.target, [...path, e.target])
       }
     }
@@ -246,9 +255,23 @@ export class Graph {
     return best.map((id) => this.byId.get(id)!)
   }
 
+  /**
+   * Every client enters through one of `entryKinds` (optionally behind a CDN /
+   * WAF / load balancer) and none calls compute directly.
+   */
+  clientsEnterThrough(entryKinds: ComponentKind[]): { pass: boolean; detail?: string } {
+    const clients = this.ofKind(...CLIENT_KINDS)
+    if (!clients.length) return { pass: false, detail: 'No clients on the canvas.' }
+    const edge: ComponentKind[] = ['cdn', 'waf', 'load-balancer']
+    const bypass = clients.filter((c) => this.targets(c.id, SYNC_PROTOCOLS).some((t) => COMPUTE_KINDS.includes(t.kind) && !entryKinds.includes(t.kind)))
+    if (bypass.length) return { pass: false, detail: `${bypass.map((c) => c.label).join(', ')} call services directly, bypassing the entry point.` }
+    const missing = clients.filter((c) => !(entryKinds.includes(c.kind) || this.reaches(c, (t) => entryKinds.includes(t.kind), { through: edge, maxDepth: 5 })))
+    return missing.length ? { pass: false, detail: `${missing.map((c) => c.label).join(', ')} never reach an entry point.` } : { pass: true }
+  }
+
   /** Clients that talk straight to a data store. */
   clientsTouchingData(): DiagramNode[] {
-    return this.ofKind(...CLIENT_KINDS).filter((c) =>
+    return this.ofKind(...CLIENT_KINDS, 'device').filter((c) =>
       this.targets(c.id).some((t) => DATA_KINDS.includes(t.kind) && t.kind !== 'object-storage'),
     )
   }

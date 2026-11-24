@@ -116,9 +116,17 @@ export function ReviewPanel({
   sandbox?: boolean
 }) {
   const dirty = useWorkspace((s) => s.dirtySinceEval)
+  const usedReference = useWorkspace((s) => s.usedReference) && !sandbox
+  const referenceNote = usedReference && (
+    <p className="mb-3 flex items-start gap-2 rounded-xl bg-zinc-50 px-3 py-2 text-[12px] leading-snug text-zinc-600 dark:bg-white/[0.04] dark:text-zinc-400">
+      <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-sky-500" />
+      Score not recorded — reference solution loaded. Reset or import a design to track progress again.
+    </p>
+  )
   if (!evaluation)
     return (
       <div className="p-4">
+        {referenceNote}
         <div className="rounded-2xl border border-dashed border-zinc-200 p-5 text-center dark:border-white/10">
           <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-600 dark:bg-brand-500/15 dark:text-brand-300">
             <Sparkles className="h-5 w-5" />
@@ -155,6 +163,7 @@ export function ReviewPanel({
 
   return (
     <div className="scrollbar-thin h-full overflow-y-auto p-4 pb-10">
+      {referenceNote}
       {dirty && (
         <button
           onClick={onCheck}

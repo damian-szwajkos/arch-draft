@@ -1,6 +1,7 @@
 import { useReactFlow, useViewport } from '@xyflow/react'
 import { Map, Maximize, Redo2, Undo2, ZoomIn, ZoomOut } from 'lucide-react'
 import { cn } from '../../lib/cn'
+import { shortcut } from '../../lib/keys'
 import { useWorkspace } from '../../store/workspace'
 
 export function CanvasToolbar({ showMap, onToggleMap }: { showMap: boolean; onToggleMap: () => void }) {
@@ -13,10 +14,10 @@ export function CanvasToolbar({ showMap, onToggleMap }: { showMap: boolean; onTo
   return (
     <div className="pointer-events-none absolute inset-x-0 bottom-4 z-10 flex justify-center px-4">
       <div className="panel pointer-events-auto flex items-center gap-0.5 rounded-full px-1.5 py-1">
-        <button className="icon-btn rounded-full" onClick={undo} disabled={!canUndo} title="Undo (⌘Z)" aria-label="Undo">
+        <button className="icon-btn rounded-full" onClick={undo} disabled={!canUndo} title={`Undo (${shortcut('Z')})`} aria-label="Undo">
           <Undo2 className="h-4 w-4" />
         </button>
-        <button className="icon-btn rounded-full" onClick={redo} disabled={!canRedo} title="Redo (⇧⌘Z)" aria-label="Redo">
+        <button className="icon-btn rounded-full" onClick={redo} disabled={!canRedo} title={`Redo (${shortcut('Z', true)})`} aria-label="Redo">
           <Redo2 className="h-4 w-4" />
         </button>
         <span className="mx-1 h-5 w-px bg-zinc-200 dark:bg-white/10" />

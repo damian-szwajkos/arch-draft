@@ -17,6 +17,7 @@ import {
   TriangleAlert,
   type LucideIcon,
 } from 'lucide-react'
+import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { ScenarioCard } from '../components/ScenarioCard'
 import { REPO_URL, SiteFooter, SiteHeader } from '../components/SiteHeader'
@@ -99,7 +100,7 @@ function HeroMock() {
 
       {/* Floating inspector */}
       <div className="absolute top-24 -left-16 hidden w-56 rounded-xl border border-white/10 bg-[#171a22]/95 p-3 shadow-2xl backdrop-blur xl:block">
-        <p className="text-[10px] font-semibold tracking-wide text-zinc-500 uppercase">Technology</p>
+        <p className="text-[10px] font-semibold tracking-wide text-zinc-400 uppercase">Technology</p>
         <div className="mt-2 flex flex-wrap gap-1.5">
           {['Kafka', 'RabbitMQ', 'NATS', 'Pulsar'].map((t, i) => (
             <span key={t} className={i === 0 ? 'rounded-md border border-brand-400 bg-brand-500/20 px-2 py-0.5 text-[11px] font-medium text-brand-200' : 'rounded-md border border-white/10 px-2 py-0.5 text-[11px] text-zinc-400'}>
@@ -174,6 +175,51 @@ const FAQ = [
   ['Who is it for?', 'Developers growing into senior and architect roles, people preparing for system-design interviews, and teams running architecture katas.'],
 ]
 
+/** Endless chip strip that eases down to a slow crawl while hovered. */
+function Marquee({ items }: { items: string[] }) {
+  const track = useRef<HTMLDivElement>(null)
+  const frame = useRef(0)
+  useEffect(() => () => cancelAnimationFrame(frame.current), [])
+  // Ease the playback rate instead of switching it, so the strip never jerks.
+  const easeTo = (target: number) => {
+    const anim = track.current?.getAnimations()[0]
+    if (!anim) return
+    cancelAnimationFrame(frame.current)
+    const from = anim.playbackRate
+    const start = performance.now()
+    const step = (now: number) => {
+      const k = Math.min(1, (now - start) / 450)
+      const eased = 1 - (1 - k) ** 3
+      anim.updatePlaybackRate(from + (target - from) * eased)
+      if (k < 1) frame.current = requestAnimationFrame(step)
+    }
+    frame.current = requestAnimationFrame(step)
+  }
+  return (
+    <div
+      className="relative mt-5 overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_10%,black_90%,transparent)]"
+      onMouseEnter={() => easeTo(0.2)}
+      onMouseLeave={() => easeTo(1)}
+    >
+      <div ref={track} className="marquee flex w-max gap-2.5">
+        {[...items, ...items].map((t, i) => (
+          <span key={i} className="chip shrink-0 whitespace-nowrap" aria-hidden={i >= items.length}>
+            {t}
+          </span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/** A featured subset for the landing page: a spread of levels (two each), topped up in catalog order. */
+const FEATURED_COUNT = 6
+const FEATURED = (() => {
+  const picked = (['beginner', 'intermediate', 'advanced'] as const).flatMap((d) => SCENARIOS.filter((s) => s.difficulty === d).slice(0, FEATURED_COUNT / 3))
+  for (const s of SCENARIOS) if (picked.length < FEATURED_COUNT && !picked.includes(s)) picked.push(s)
+  return picked
+})()
+
 export function LandingPage() {
   const progress = useProgress()
   const techNames = TECH.filter((t) => !t.kinds.includes('external')).map((t) => t.name)
@@ -205,7 +251,7 @@ export function LandingPage() {
                 Browse all scenarios
               </Link>
             </div>
-            <p className="mt-5 text-xs text-zinc-500">Free forever · No sign-up · Saved in your browser</p>
+            <p className="mt-5 text-xs text-zinc-400">Free forever · No sign-up · Saved in your browser</p>
           </div>
           <HeroMock />
         </section>
@@ -213,16 +259,8 @@ export function LandingPage() {
 
       {/* Tech marquee */}
       <section className="border-b border-zinc-200/70 py-8 dark:border-white/10" aria-label="Technologies">
-        <p className="text-center text-xs font-semibold tracking-wide text-zinc-500 uppercase">Choose from the stacks teams actually run</p>
-        <div className="relative mt-5 overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_10%,black_90%,transparent)]">
-          <div className="marquee flex w-max gap-2.5">
-            {[...techNames, ...techNames].map((t, i) => (
-              <span key={i} className="chip shrink-0 whitespace-nowrap" aria-hidden={i >= techNames.length}>
-                {t}
-              </span>
-            ))}
-          </div>
-        </div>
+        <p className="text-center text-xs font-semibold tracking-wide text-zinc-500 uppercase dark:text-zinc-400">Choose from the stacks teams actually run</p>
+        <Marquee items={techNames} />
       </section>
 
       {/* How it works */}
@@ -239,7 +277,9 @@ export function LandingPage() {
                 <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-600 dark:bg-brand-500/15 dark:text-brand-300">
                   <Icon className="h-5 w-5" />
                 </span>
-                <span className="font-mono text-sm text-zinc-300 dark:text-zinc-600">{n}</span>
+                <span className="font-mono text-sm text-zinc-300 dark:text-zinc-600" aria-hidden>
+                  {n}
+                </span>
               </div>
               <h3 className="mt-5 text-lg font-semibold">{title}</h3>
               <p className="mt-2 text-sm leading-relaxed text-zinc-500 dark:text-zinc-400">{body}</p>
@@ -275,11 +315,11 @@ export function LandingPage() {
             <h2 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">From your first shop to a regulated bank.</h2>
           </div>
           <Link to="/scenarios" className="btn-secondary sm:ml-auto">
-            All scenarios <ArrowRight className="h-4 w-4" />
+            Browse all {SCENARIOS.length} scenarios <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {SCENARIOS.slice(0, 6).map((s) => (
+          {FEATURED.map((s) => (
             <ScenarioCard key={s.id} s={s} progress={progress[s.id]} />
           ))}
         </div>
@@ -299,7 +339,7 @@ export function LandingPage() {
           <div className="space-y-5">
             {CONCEPT_GROUPS.map((g) => (
               <div key={g}>
-                <p className="text-xs font-semibold tracking-wide text-zinc-500 uppercase">{g}</p>
+                <p className="text-xs font-semibold tracking-wide text-zinc-500 uppercase dark:text-zinc-400">{g}</p>
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {CONCEPTS.filter((c) => c.group === g).map((c) => (
                     <Link key={c.id} to={`/concepts/${c.id}`} className="chip hover:border-brand-300 hover:text-brand-700 dark:hover:text-brand-300">

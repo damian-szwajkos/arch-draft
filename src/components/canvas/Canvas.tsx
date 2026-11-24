@@ -78,21 +78,37 @@ export function Canvas() {
     [screenToFlowPosition, containerAt],
   )
 
-  // Re-parent nodes dropped into / out of containers.
+  // Re-parent nodes dropped into / out of containers — every dragged node, in one update.
   const onNodeDragStop = useCallback(
-    (_: unknown, node: ArchNode) => {
-      if (isContainer(node)) return
-      const internal = getInternalNode(node.id)
-      if (!internal) return
-      const abs = internal.internals.positionAbsolute
-      const center = { x: abs.x + (internal.measured.width ?? 0) / 2, y: abs.y + (internal.measured.height ?? 0) / 2 }
-      const container = containerAt(center, node.id)
-      if (container?.id === node.parentId) return
-      if (container) useWorkspace.getState().setParent(node.id, container.id, { x: abs.x - container.x, y: abs.y - container.y })
-      else useWorkspace.getState().setParent(node.id, undefined, { x: abs.x, y: abs.y })
+    (_: unknown, node: ArchNode, dragged: ArchNode[]) => {
+      const moved = dragged.length ? dragged : [node]
+      const movedIds = new Set(moved.map((n) => n.id))
+      const updates: { id: string; parentId: string | undefined; position: XYPosition }[] = []
+      for (const n of moved) {
+        // Containers keep their place; children of a container that moved with it stay inside it.
+        if (isContainer(n) || (n.parentId && movedIds.has(n.parentId))) continue
+        const internal = getInternalNode(n.id)
+        if (!internal) continue
+        const abs = internal.internals.positionAbsolute
+        const center = { x: abs.x + (internal.measured.width ?? 0) / 2, y: abs.y + (internal.measured.height ?? 0) / 2 }
+        const container = containerAt(center, n.id)
+        if (container?.id === n.parentId) continue
+        updates.push(
+          container
+            ? { id: n.id, parentId: container.id, position: { x: abs.x - container.x, y: abs.y - container.y } }
+            : { id: n.id, parentId: undefined, position: { x: abs.x, y: abs.y } },
+        )
+      }
+      useWorkspace.getState().setParents(updates)
     },
     [getInternalNode, containerAt],
   )
+
+  // One keyboard delete (a node plus its connected edges) = one undo step.
+  const onBeforeDelete = useCallback(async ({ nodes, edges }: { nodes: ArchNode[]; edges: ArchEdge[] }) => {
+    if (nodes.length || edges.length) useWorkspace.getState().pushHistory()
+    return true
+  }, [])
 
   // Undo / redo / duplicate shortcuts.
   useEffect(() => {
@@ -125,6 +141,7 @@ export function Canvas() {
         onConnect={onConnect}
         onNodeDragStart={() => useWorkspace.getState().pushHistory()}
         onNodeDragStop={onNodeDragStop}
+        onBeforeDelete={onBeforeDelete}
         connectionMode={ConnectionMode.Loose}
         deleteKeyCode={['Backspace', 'Delete']}
         fitView

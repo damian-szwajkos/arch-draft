@@ -1,4 +1,4 @@
-import { lazy, StrictMode, Suspense } from 'react'
+import { lazy, StrictMode, Suspense, type ReactNode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { useEffect } from 'react'
@@ -8,6 +8,7 @@ import { LandingPage } from './pages/LandingPage'
 import { ScenariosPage } from './pages/ScenariosPage'
 import { ConceptsPage, ConceptDetailPage } from './pages/ConceptsPage'
 import { NotFound } from './pages/NotFound'
+import { ErrorBoundary } from './components/ErrorBoundary'
 
 initTheme()
 
@@ -22,6 +23,12 @@ function Loading() {
   )
 }
 
+/** Top-level error boundary; navigating to another route clears the error screen. */
+function RouteErrorBoundary({ children }: { children: ReactNode }) {
+  const { pathname } = useLocation()
+  return <ErrorBoundary resetKey={pathname}>{children}</ErrorBoundary>
+}
+
 function ScrollToTop() {
   const { pathname } = useLocation()
   useEffect(() => {
@@ -34,15 +41,17 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
       <ScrollToTop />
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/scenarios" element={<ScenariosPage />} />
-        <Route path="/play/:id" element={<Suspense fallback={<Loading />}><WorkspacePage mode="scenario" /></Suspense>} />
-        <Route path="/sandbox" element={<Suspense fallback={<Loading />}><WorkspacePage mode="sandbox" /></Suspense>} />
-        <Route path="/concepts" element={<ConceptsPage />} />
-        <Route path="/concepts/:id" element={<ConceptDetailPage />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <RouteErrorBoundary>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/scenarios" element={<ScenariosPage />} />
+          <Route path="/play/:id" element={<Suspense fallback={<Loading />}><WorkspacePage mode="scenario" /></Suspense>} />
+          <Route path="/sandbox" element={<Suspense fallback={<Loading />}><WorkspacePage mode="sandbox" /></Suspense>} />
+          <Route path="/concepts" element={<ConceptsPage />} />
+          <Route path="/concepts/:id" element={<ConceptDetailPage />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </RouteErrorBoundary>
     </BrowserRouter>
   </StrictMode>,
 )

@@ -44,9 +44,9 @@ export const kindIs =
 export const external = (g: Graph, trait: string, labelPattern: RegExp) => (n: DiagramNode) =>
   n.kind === 'external' && (g.hasTrait(n, trait) || labelPattern.test(n.label))
 
-export const PAYMENT = /pay|stripe|adyen|braintree|checkout/i
-export const EMAIL = /mail|sendgrid|ses|smtp/i
-export const PUSH = /push|fcm|apns|sms|twilio/i
+export const PAYMENT = /pay|stripe|adyen|braintree|checkout|blik|przelewy|p24|klarna|mollie|psp|acquir/i
+export const EMAIL = /mail|sendgrid|ses|smtp|postmark|brevo|resend/i
+export const PUSH = /push|fcm|firebase|apns|onesignal|notif|sms|twilio/i
 export const MAPS = /map|geo|routing/i
 
 export function observability(g: Graph, ...kinds: ComponentKind[]) {

@@ -13,17 +13,25 @@ PostgreSQL or MongoDB, Redis…), record your decisions, and get an instant revi
 
 ## Features
 
-- **8 scenarios** from beginner to advanced (e-commerce, URL shortener, observability retrofit,
-  video courses, social feed, food delivery, ticket flash sale, banking ledger).
-- **Diagram workspace** built on React Flow: 36 component types, containers for modular monoliths
+- **20 scenarios** across three levels, each modelled on public engineering write-ups (Allegro, InPost,
+  BLIK, PKO BP, Booksy, Docplanner, Stripe, Adyen, Monzo, Uber, Shopify, Slack, Segment, LMAX…):
+  - *Beginner* — indie web shop, URL shortener, doctor booking (double-booking), notification platform,
+    public API rate limiting & idempotency, Backend-for-Frontend.
+  - *Intermediate* — observability retrofit, video courses, social feed, food delivery, parcel-locker IoT
+    network, strangler-fig migration of an insurer monolith, multi-tenant SaaS (silo/pool), consolidating
+    150 microservices back into one worker.
+  - *Advanced* — ticket flash sale, neobank ledger, national 6-digit mobile payment scheme, cell-based
+    architecture, exchange matching engine, exactly-once ad-click billing.
+- **Diagram workspace** built on React Flow: 37 component types (including IoT devices), containers for modular monoliths
   and bounded contexts, 7 communication types (REST, gRPC, GraphQL, WebSocket, events, data, telemetry).
-- **150+ technologies** with trade-off notes and machine-readable traits the reviewer reasons about
+- **170+ technologies** with trade-off notes and machine-readable traits the reviewer reasons about
   (e.g. Kafka is *replayable*, RabbitMQ is a *queue*, Redis supports *geo* and *TTL*).
 - **Decisions panel** — architecture style, communication, data strategy, stack preferences and an ADR rationale.
 - **Instant review** — key requirements, bonus points and anti-pattern detection (shared databases,
   clients hitting the DB, long synchronous chains), and a 0–100 score.
 - **Reference solutions** with walkthroughs, loadable into your canvas.
-- **Concept library** — 33 patterns (saga, outbox, CDC, CQRS, fan-out, SLOs…) linked from every check.
+- **Concept library** — 45 patterns (saga, outbox, CQRS, cells, multi-tenancy, stream processing, SLOs…)
+  linked from every check, each with example libraries and tools per ecosystem.
 - **Sandbox** mode with architecture lint, PNG / JSON export and JSON import.
 - **No backend, no auth** — progress and diagrams autosave in `localStorage`.
 
@@ -56,6 +64,8 @@ src/
 1. Create `src/data/scenarios/<name>.ts` exporting a `Scenario` (brief, capabilities, checks, reference).
 2. Write checks against the `Graph` API (`owners`, `ownerFamily`, `storesOf`, `asyncFlow`, `calls`, `hasTrait`…).
 3. Author the reference diagram with the `diagram()` helper and register it in `scenarios/index.ts`.
+   Add a `<name>.test.ts` next to it that calls `assertScenarioContract()` (see `src/engine/scenarioContract.ts`)
+   and adds a few wrong designs that must fail and an alternative valid design that must pass.
 4. Run `npm test` — the suite fails unless your reference solution scores 100
    and an empty canvas fails.
 

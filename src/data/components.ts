@@ -29,6 +29,7 @@ export const CATEGORIES: { id: Category; name: string; description: string }[] =
 export const COMPONENTS: ComponentDef[] = [
   // Clients
   { kind: 'web-app', name: 'Web app', category: 'clients', defaultLabel: 'Web App', description: 'Browser single-page or server-rendered application.', keywords: ['spa', 'frontend', 'react', 'angular'] },
+  { kind: 'device', name: 'IoT device / edge', category: 'clients', defaultLabel: 'Device Fleet', description: 'Lockers, chargers, sensors or vehicles talking to the backend over MQTT.', keywords: ['iot', 'mqtt', 'sensor', 'locker', 'edge', 'charger'] },
   { kind: 'mobile-app', name: 'Mobile app', category: 'clients', defaultLabel: 'Mobile App', description: 'Native or cross-platform iOS / Android app.', keywords: ['ios', 'android'] },
 
   // Edge
@@ -134,5 +135,6 @@ export function defaultProtocol(source: ComponentKind, target: ComponentKind): P
   if (source === 'cdc' || target === 'cdc') return 'event'
   if (DATA_KINDS.includes(target) || target === 'secrets') return 'data'
   if (target === 'realtime-gateway' && (source === 'web-app' || source === 'mobile-app')) return 'websocket'
+  if (source === 'device' || target === 'device') return 'event'
   return 'http'
 }

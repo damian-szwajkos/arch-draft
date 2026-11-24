@@ -5,6 +5,7 @@ import { CATEGORIES, CATEGORY_STYLE, COMPONENT_BY_KIND, PROTOCOLS } from '../../
 import { TECH_BY_ID, techFor } from '../../data/tech'
 import { cn } from '../../lib/cn'
 import { KIND_ICON } from '../../lib/icons'
+import { shortcut } from '../../lib/keys'
 import { useWorkspace, type ArchEdge, type ArchNode } from '../../store/workspace'
 import { PROTOCOL_STYLE } from '../canvas/ArchEdgeView'
 import { useWorkspaceContext } from './ScenarioContext'
@@ -51,10 +52,10 @@ function EmptyInspector() {
             </li>
           ))}
         </ul>
-        <div className="mt-4 flex flex-wrap gap-x-3 gap-y-1.5 text-[11px] text-zinc-500">
+        <div className="mt-4 flex flex-wrap gap-x-3 gap-y-1.5 text-[11px] text-zinc-500 dark:text-zinc-400">
           <span><kbd className="kbd">⌫</kbd> delete</span>
-          <span><kbd className="kbd">⌘Z</kbd> undo</span>
-          <span><kbd className="kbd">⌘D</kbd> duplicate</span>
+          <span><kbd className="kbd">{shortcut('Z')}</kbd> undo</span>
+          <span><kbd className="kbd">{shortcut('D')}</kbd> duplicate</span>
           <span><kbd className="kbd">Shift</kbd>+drag select</span>
         </div>
       </div>
@@ -92,7 +93,7 @@ function NodeInspector({ node }: { node: ArchNode }) {
           <div className="text-xs text-zinc-500 dark:text-zinc-400">{CATEGORIES.find((c) => c.id === def.category)?.name}</div>
         </div>
         {!def.container && (
-          <button className="icon-btn" title="Duplicate (⌘D)" aria-label="Duplicate" onClick={() => useWorkspace.getState().duplicateNode(node.id)}>
+          <button className="icon-btn" title={`Duplicate (${shortcut('D')})`} aria-label="Duplicate" onClick={() => useWorkspace.getState().duplicateNode(node.id)}>
             <Copy className="h-4 w-4" />
           </button>
         )}
@@ -102,7 +103,7 @@ function NodeInspector({ node }: { node: ArchNode }) {
       </div>
       <p className="mt-3 text-[12px] leading-snug text-zinc-500 dark:text-zinc-400">{def.description}</p>
       {parent && (
-        <p className="mt-2 text-[12px] text-zinc-500">
+        <p className="mt-2 text-[12px] text-zinc-500 dark:text-zinc-400">
           Inside <b className="font-medium text-zinc-700 dark:text-zinc-300">{parent.data.label}</b>. Drag it out to detach.
         </p>
       )}
@@ -153,7 +154,7 @@ function NodeInspector({ node }: { node: ArchNode }) {
               )}
             </div>
           ) : (
-            <p className="mt-2 text-[11px] text-zinc-500">No technology chosen — pick one to make trade-offs explicit.</p>
+            <p className="mt-2 text-[11px] text-zinc-500 dark:text-zinc-400">No technology chosen — pick one to make trade-offs explicit.</p>
           )}
         </div>
       )}
@@ -241,7 +242,7 @@ function NodeInspector({ node }: { node: ArchNode }) {
                     onClick={() => useWorkspace.getState().select(e.id)}
                   >
                     <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: PROTOCOL_STYLE[p].color }} />
-                    <span className="w-12 shrink-0 font-mono text-[10px] text-zinc-500">{PROTOCOLS.find((x) => x.id === p)?.short}</span>
+                    <span className="w-12 shrink-0 font-mono text-[10px] text-zinc-500 dark:text-zinc-400">{PROTOCOLS.find((x) => x.id === p)?.short}</span>
                     <span className="text-zinc-400">{outgoing ? '→' : '←'}</span>
                     <span className="truncate text-zinc-700 dark:text-zinc-300">{other?.data.label}</span>
                   </button>

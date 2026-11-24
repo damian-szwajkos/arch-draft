@@ -1,44 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { SCENARIOS } from '../data/scenarios'
-import { COMPONENT_BY_KIND } from '../data/components'
-import { TECH_BY_ID } from '../data/tech'
 import { evaluateScenario } from './evaluate'
+import { assertScenarioContract } from './scenarioContract'
 
-describe('scenario reference solutions', () => {
-  for (const s of SCENARIOS) {
-    it(`${s.id}: reference passes with a perfect score`, () => {
-      const ev = evaluateScenario(s, s.reference.diagram, s.reference.decisions)
-      const failed = ev.results.filter((r) => !r.pass).map((r) => `${r.category}:${r.id} ${r.detail ?? ''}`)
-      expect(failed, failed.join('\n')).toEqual([])
-      expect(ev.score).toBe(100)
-      expect(ev.passed).toBe(true)
-    })
-
-    it(`${s.id}: empty canvas fails`, () => {
-      const ev = evaluateScenario(s, { nodes: [], edges: [] }, { stack: {} })
-      expect(ev.passed).toBe(false)
-    })
-
-    it(`${s.id}: starter (if any) does not pass`, () => {
-      if (!s.starter) return
-      const ev = evaluateScenario(s, s.starter, s.starterDecisions ?? { stack: {} })
-      expect(ev.passed).toBe(false)
-    })
-
-    it(`${s.id}: data references are valid`, () => {
-      const domainIds = new Set(s.domains.map((d) => d.id))
-      for (const n of s.reference.diagram.nodes) {
-        expect(COMPONENT_BY_KIND[n.kind], n.kind).toBeTruthy()
-        if (n.tech) {
-          expect(TECH_BY_ID[n.tech], `${n.id} tech ${n.tech}`).toBeTruthy()
-          expect(TECH_BY_ID[n.tech].kinds, `${n.id}: ${n.tech} on ${n.kind}`).toContain(n.kind)
-        }
-        for (const d of n.domains) expect(domainIds.has(d), `${n.id} domain ${d}`).toBe(true)
-      }
-      const ids = new Set(s.reference.diagram.nodes.map((n) => n.id))
-      expect(ids.size).toBe(s.reference.diagram.nodes.length)
-    })
-  }
+describe('scenario contract', () => {
+  for (const s of SCENARIOS) assertScenarioContract(s)
+  it('scenario ids are unique', () => {
+    expect(new Set(SCENARIOS.map((s) => s.id)).size).toBe(SCENARIOS.length)
+  })
 })
 
 describe('anti-patterns', () => {
@@ -94,5 +63,64 @@ describe('component details', () => {
     const { CONCEPT_BY_ID } = await import('../data/concepts')
     const missing = Object.entries(COMPONENT_DETAILS).flatMap(([k, d]) => (d.concepts ?? []).filter((c) => !CONCEPT_BY_ID[c]).map((c) => `${k}:${c}`))
     expect(missing).toEqual([])
+  })
+})
+
+describe('graph engine', () => {
+  it('asyncFlow relays through a worker after a broker', async () => {
+    const { diagram } = await import('../data/scenarios/builder')
+    const { Graph } = await import('./graph')
+    const g = new Graph(
+      diagram(
+        [
+          ['posts', 'service', 'Posts', 0, 0],
+          ['bus', 'broker', 'Bus', 0, 0],
+          ['idx', 'worker', 'Indexer', 0, 0],
+          ['os', 'search', 'Index', 0, 0],
+        ],
+        [
+          ['posts', 'bus', 'event'],
+          ['bus', 'idx', 'event'],
+          ['idx', 'os', 'data'],
+        ],
+      ),
+    )
+    expect(g.asyncFlow([g.node('posts')!], [g.node('os')!])).toBe(true)
+  })
+
+  it('asyncFlow accepts a component consuming its own queue', async () => {
+    const { diagram } = await import('../data/scenarios/builder')
+    const { Graph } = await import('./graph')
+    const g = new Graph(diagram([['app', 'monolith', 'App', 0, 0], ['q', 'broker', 'Queue', 0, 0]], [['app', 'q', 'event'], ['q', 'app', 'event']]))
+    const app = g.node('app')!
+    expect(g.asyncFlow([app], [app])).toBe(true)
+  })
+
+  it('in-process module calls are not sync network hops', async () => {
+    const { diagram } = await import('../data/scenarios/builder')
+    const { Graph } = await import('./graph')
+    const g = new Graph(
+      diagram(
+        [
+          ['app', 'monolith', 'App', 0, 0],
+          ['a', 'module', 'A', 0, 0, { parent: 'app' }],
+          ['b', 'module', 'B', 0, 0, { parent: 'app' }],
+          ['c', 'module', 'C', 0, 0, { parent: 'app' }],
+          ['d', 'module', 'D', 0, 0, { parent: 'app' }],
+          ['e', 'module', 'E', 0, 0, { parent: 'app' }],
+        ],
+        [['a', 'b', 'http'], ['b', 'c', 'http'], ['c', 'd', 'http'], ['d', 'e', 'http']],
+      ),
+    )
+    expect(g.longestSyncChain().length).toBeLessThanOrEqual(1)
+  })
+
+  it('clientsEnterThrough rejects clients bypassing the entry point', async () => {
+    const { diagram } = await import('../data/scenarios/builder')
+    const { Graph } = await import('./graph')
+    const ok = new Graph(diagram([['w', 'web-app', 'Web', 0, 0], ['cdn', 'cdn', 'CDN', 0, 0], ['gw', 'api-gateway', 'GW', 0, 0], ['s', 'service', 'S', 0, 0]], [['w', 'cdn'], ['cdn', 'gw'], ['gw', 's']]))
+    expect(ok.clientsEnterThrough(['api-gateway']).pass).toBe(true)
+    const bad = new Graph(diagram([['w', 'web-app', 'Web', 0, 0], ['gw', 'api-gateway', 'GW', 0, 0], ['s', 'service', 'S', 0, 0]], [['w', 'gw'], ['w', 's', 'http'], ['gw', 's']]))
+    expect(bad.clientsEnterThrough(['api-gateway']).pass).toBe(false)
   })
 })

@@ -20,6 +20,11 @@ export const COMPONENT_DETAILS: Record<ComponentKind, ComponentDetails> = {
     useWhen: 'Users need push notifications, offline use, location or device features.',
     concepts: ['bff', 'idempotency'],
   },
+  device: {
+    details: 'A fleet of physical devices — parcel lockers, EV chargers, meters, vehicles — with constrained hardware and flaky connectivity. They hold a long-lived MQTT connection, publish telemetry and receive commands; each device authenticates with its own certificate.',
+    useWhen: 'Your system controls or monitors hardware in the field.',
+    concepts: ['iot-messaging', 'backpressure'],
+  },
   cdn: {
     details: 'A global network of edge caches that serves static assets, images and video from a location near the user. It offloads traffic from your origin and cuts latency dramatically for read-heavy content.',
     useWhen: 'You serve static files or media, or cacheable responses to a global audience.',

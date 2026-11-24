@@ -1,4 +1,4 @@
-import type { Scenario } from '../../engine/types'
+import { SYNC_PROTOCOLS, type Scenario } from '../../engine/types'
 import { COMPUTE_KINDS } from '../../engine/graph'
 import { diagram, EMAIL, external, kindIs, PAYMENT } from './builder'
 
@@ -94,7 +94,11 @@ export const shopfront: Scenario = {
       concepts: ['background-jobs', 'event-driven'],
       test: (g) => {
         const notif = g.ownerFamily('notifications')
-        const decoupled = g.asyncFlow(g.ownerFamily('orders'), notif) || notif.some((n) => n.kind === 'worker' || n.kind === 'function')
+        const orders = g.ownerFamily('orders')
+        const orderIds = new Set(orders.map((o) => o.id))
+        // A worker only decouples if checkout doesn't call it synchronously.
+        const calledSync = notif.some((n) => g.sources(n.id, SYNC_PROTOCOLS).some((s) => orderIds.has(s.id)))
+        const decoupled = g.asyncFlow(orders, notif) || (!calledSync && notif.some((n) => n.kind === 'worker' || n.kind === 'function'))
         const sends = g.calls(notif, external(g, 'email', EMAIL))
         if (!decoupled) return { pass: false, detail: 'Email sending is on the checkout request path.' }
         if (!sends) return { pass: false, detail: 'Nothing sends to an email provider.' }

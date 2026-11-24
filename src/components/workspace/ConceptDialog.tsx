@@ -1,12 +1,14 @@
 import { ArrowUpRight, BookOpen } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { CONCEPT_EXAMPLES } from '../../data/conceptExamples'
 import { CONCEPT_BY_ID, type Concept } from '../../data/concepts'
 import { SCENARIOS } from '../../data/scenarios'
 import { Modal } from '../ui/Modal'
 
 export function ConceptBody({ concept }: { concept: Concept }) {
   const practice = SCENARIOS.filter((s) => s.concepts.includes(concept.id))
+  const examples = CONCEPT_EXAMPLES[concept.id] ?? []
   return (
     <div className="space-y-5">
       <p className="text-[15px] leading-relaxed font-medium text-zinc-800 dark:text-zinc-200">{concept.summary}</p>
@@ -33,6 +35,47 @@ export function ConceptBody({ concept }: { concept: Concept }) {
           </ul>
         </div>
       </div>
+      {examples.length > 0 && (
+        <div>
+          <h4 className="label">In practice</h4>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {examples.map((g) => (
+              <div key={g.label} className="rounded-xl border border-zinc-200/80 p-3 dark:border-white/10">
+                <p className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400">{g.label}</p>
+                <ul className="mt-2 space-y-1.5">
+                  {g.items.map((it) => {
+                    const inner = (
+                      <>
+                        <span className="font-semibold text-zinc-800 group-hover:text-brand-700 dark:text-zinc-100 dark:group-hover:text-brand-300">
+                          {it.name}
+                        </span>
+                        {it.url && <ArrowUpRight className="ml-0.5 inline h-3 w-3 align-[-1px] text-zinc-400" />}
+                        <span className="block text-zinc-500 dark:text-zinc-400">{it.note}</span>
+                      </>
+                    )
+                    return (
+                      <li key={it.name} className="text-[13px] leading-snug">
+                        {it.url ? (
+                          <a
+                            href={it.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="group -mx-1.5 block rounded-md px-1.5 py-1 transition-colors hover:bg-zinc-50 dark:hover:bg-white/5"
+                          >
+                            {inner}
+                          </a>
+                        ) : (
+                          <div className="py-1">{inner}</div>
+                        )}
+                      </li>
+                    )
+                  })}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       {practice.length > 0 && (
         <div>
           <h4 className="label">Practice it</h4>
