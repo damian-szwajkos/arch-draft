@@ -1227,6 +1227,513 @@ export const CONCEPT_EXAMPLES: Record<string, ConceptExampleGroup[]> = {
       ],
     },
   ],
+  // Mark Richards — Software Architecture Monday coverage --------------------
+  'architecture-characteristics': [
+    {
+      label: 'Catalogues & models',
+      items: [
+        { name: 'ISO/IEC 25010', note: 'Standard product-quality model of quality characteristics', url: 'https://iso25000.com/index.php/en/iso-25000-standards/iso-25010' },
+        { name: 'arc42 Quality Model', note: 'Searchable catalogue of quality attributes with example requirements', url: 'https://quality.arc42.org' },
+      ],
+    },
+    {
+      label: 'Further reading',
+      items: [
+        { name: 'Software Architecture Monday — Lesson 187', note: 'Mark Richards on categorizing architectural characteristics', url: 'https://www.developertoarchitect.com/lessons/lesson187.html' },
+        { name: 'Software Architecture Monday — Lesson 188', note: 'Identifying the characteristics that drive a design', url: 'https://www.developertoarchitect.com/lessons/lesson188.html' },
+        { name: 'Software Architecture Monday — Lesson 85', note: 'Why scalability and elasticity are different', url: 'https://www.developertoarchitect.com/lessons/lesson85.html' },
+        { name: 'Fundamentals of Software Architecture (2nd ed.)', note: 'Richards & Ford book with chapters on identifying and measuring characteristics', url: 'https://www.oreilly.com/library/view/fundamentals-of-software/9781098175504/' },
+      ],
+    },
+  ],
+  'architectural-quantum': [
+    {
+      label: 'Decoupling quanta',
+      items: [
+        { name: 'Apache Kafka', note: 'Event log that replaces synchronous calls between quanta', url: 'https://kafka.apache.org' },
+        { name: 'RabbitMQ', note: 'Queues that let each side scale and fail independently', url: 'https://www.rabbitmq.com' },
+        { name: 'Debezium', note: 'CDC feeds a local copy of another quantum’s data', url: 'https://debezium.io' },
+      ],
+    },
+    {
+      label: 'Further reading',
+      items: [
+        { name: 'Software Architecture Monday — Lesson 189', note: 'Mark Richards on architectural quantum trade-offs', url: 'https://www.developertoarchitect.com/lessons/lesson189.html' },
+        { name: 'Software Architecture Monday — Lesson 211', note: 'Architectural modularity and when to break a system apart', url: 'https://www.developertoarchitect.com/lessons/lesson211.html' },
+        { name: 'Software Architecture: The Hard Parts', note: 'Ford, Richards, Sadalage & Dehghani on quanta, static and dynamic coupling', url: 'https://www.oreilly.com/library/view/software-architecture-the/9781492086888/' },
+        { name: 'Building Evolutionary Architectures', note: 'Where the architectural quantum idea was introduced', url: 'https://evolutionaryarchitecture.com' },
+      ],
+    },
+  ],
+  'domain-vs-technical-partitioning': [
+    {
+      label: 'Enforcing the partitioning',
+      items: [
+        { name: 'Spring Modulith', note: 'Domain modules as top-level packages, verified in tests', url: 'https://spring.io/projects/spring-modulith' },
+        { name: 'ArchUnit', note: 'Rules that keep domain slices from depending on each other', url: 'https://www.archunit.org' },
+        { name: 'Nx module boundaries', note: 'Tag libraries by domain and lint forbidden imports', url: 'https://nx.dev/features/enforce-module-boundaries' },
+      ],
+    },
+    {
+      label: 'Teams & domains',
+      items: [
+        { name: 'Conway’s Law', note: 'Martin Fowler’s explanation and the inverse Conway manoeuvre', url: 'https://martinfowler.com/bliki/ConwaysLaw.html' },
+        { name: 'Team Topologies', note: 'Stream-aligned teams owning business domains end to end', url: 'https://teamtopologies.com' },
+        { name: 'Software Architecture Monday — Lesson 120', note: 'Mark Richards on domain vs. technical partitioning', url: 'https://www.developertoarchitect.com/lessons/lesson120.html' },
+      ],
+    },
+  ],
+  'fitness-functions': [
+    {
+      label: 'Structural checks',
+      items: [
+        { name: 'ArchUnit', note: 'JUnit rules for layers, cycles and package dependencies', url: 'https://www.archunit.org' },
+        { name: 'dependency-cruiser', note: 'Fails CI when JS/TS imports break boundary rules', url: 'https://github.com/sverweij/dependency-cruiser' },
+        { name: 'jQAssistant', note: 'Scans code into a graph and checks rules with queries', url: 'https://jqassistant.org' },
+        { name: 'NetArchTest', note: 'Architecture rules as .NET unit tests', url: 'https://github.com/BenMorris/NetArchTest' },
+      ],
+    },
+    {
+      label: 'Runtime & resilience checks',
+      items: [
+        { name: 'Grafana k6', note: 'Load tests with thresholds that fail a CI build', url: 'https://k6.io' },
+        { name: 'Pact', note: 'Consumer-driven contract tests block breaking API changes', url: 'https://pact.io' },
+        { name: 'Chaos Monkey', note: 'Continuously terminates instances to prove resilience', url: 'https://netflix.github.io/chaosmonkey/' },
+        { name: 'Toxiproxy', note: 'Injects latency and failures between services in tests', url: 'https://github.com/Shopify/toxiproxy' },
+      ],
+    },
+    {
+      label: 'Further reading',
+      items: [
+        { name: 'Software Architecture Monday — Lesson 73', note: 'Mark Richards introduces architecture fitness functions', url: 'https://www.developertoarchitect.com/lessons/lesson73.html' },
+        { name: 'Software Architecture Monday — Lesson 215', note: 'Fitness function-driven architecture', url: 'https://www.developertoarchitect.com/lessons/lesson215.html' },
+        { name: 'Building Evolutionary Architectures', note: 'Ford, Parsons, Kua & Sadalage book that defined the term', url: 'https://evolutionaryarchitecture.com' },
+      ],
+    },
+  ],
+  'architecture-decision-records': [
+    {
+      label: 'Tools & templates',
+      items: [
+        { name: 'adr-tools', note: 'Command-line tool to create, number and supersede ADRs', url: 'https://github.com/npryce/adr-tools' },
+        { name: 'Log4brains', note: 'Manages ADRs in Git and publishes them as a static site', url: 'https://github.com/thomvaill/log4brains' },
+        { name: 'MADR', note: 'Markdown ADR template with options and trade-offs', url: 'https://adr.github.io/madr/' },
+        { name: 'ADR examples collection', note: 'Templates and sample records by Joel Parker Henderson', url: 'https://github.com/joelparkerhenderson/architecture-decision-record' },
+      ],
+    },
+    {
+      label: 'Further reading',
+      items: [
+        { name: 'Documenting Architecture Decisions', note: 'Michael Nygard’s 2011 post that popularised ADRs', url: 'https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions' },
+        { name: 'Software Architecture Monday — Lesson 55', note: 'Mark Richards on writing ADRs', url: 'https://www.developertoarchitect.com/lessons/lesson55.html' },
+        { name: 'Software Architecture Monday — Lesson 168', note: 'ADRs and architecture stories', url: 'https://www.developertoarchitect.com/lessons/lesson168.html' },
+        { name: 'adr.github.io', note: 'Community hub for ADR formats and tooling', url: 'https://adr.github.io' },
+      ],
+    },
+  ],
+  'fallacies-of-distributed-computing': [
+    {
+      label: 'Testing against the fallacies',
+      items: [
+        { name: 'Toxiproxy', note: 'Simulates latency, bandwidth limits and dropped connections', url: 'https://github.com/Shopify/toxiproxy' },
+        { name: 'Chaos Toolkit', note: 'Declarative chaos experiments against real environments', url: 'https://chaostoolkit.org' },
+        { name: 'Gremlin', note: 'Managed fault injection: network loss, latency, blackholes', url: 'https://www.gremlin.com' },
+      ],
+    },
+    {
+      label: 'Further reading',
+      items: [
+        { name: 'Fallacies of distributed computing', note: 'History of the original eight fallacies', url: 'https://en.wikipedia.org/wiki/Fallacies_of_distributed_computing' },
+        { name: 'Software Architecture Monday — Lesson 18', note: 'Mark Richards walks through the fallacies', url: 'https://www.developertoarchitect.com/lessons/lesson18.html' },
+        { name: 'Three new fallacies (Thoughtworks podcast)', note: 'Ford & Richards on versioning, compensating updates and observability', url: 'https://www.thoughtworks.com/insights/podcasts/technology-podcasts/three-new-fallacies-distributed-computing' },
+      ],
+    },
+  ],
+  'entity-trap': [
+    {
+      label: 'Discovering behaviour',
+      items: [
+        { name: 'EventStorming', note: 'Workshop that maps workflows as domain events, not tables', url: 'https://www.eventstorming.com' },
+        { name: 'Domain Storytelling', note: 'Actors, work objects and activities drawn as stories', url: 'https://domainstorytelling.org' },
+        { name: 'Context Mapper', note: 'DSL to model bounded contexts and derive service cuts', url: 'https://contextmapper.org' },
+      ],
+    },
+    {
+      label: 'Further reading',
+      items: [
+        { name: 'Software Architecture Monday — Lesson 191', note: 'Mark Richards on the entity trap', url: 'https://www.developertoarchitect.com/lessons/lesson191.html' },
+        { name: 'Anemic Domain Model', note: 'Martin Fowler on objects that hold data but no behaviour', url: 'https://martinfowler.com/bliki/AnemicDomainModel.html' },
+      ],
+    },
+  ],
+  'code-reuse': [
+    {
+      label: 'Shared libraries',
+      items: [
+        { name: 'Semantic Versioning', note: 'Version scheme that signals breaking library changes', url: 'https://semver.org' },
+        { name: 'Renovate', note: 'Automated dependency-upgrade pull requests per service', url: 'https://docs.renovatebot.com' },
+        { name: 'Dependabot', note: 'GitHub’s automated dependency updates', url: 'https://docs.github.com/en/code-security/dependabot' },
+      ],
+    },
+    {
+      label: 'Sidecars & service mesh',
+      items: [
+        { name: 'Istio', note: 'Envoy sidecars add mTLS, retries and telemetry to every service', url: 'https://istio.io' },
+        { name: 'Linkerd', note: 'Lightweight service mesh with a Rust micro-proxy', url: 'https://linkerd.io' },
+        { name: 'Dapr', note: 'Sidecar APIs for state, pub/sub and secrets in any language', url: 'https://dapr.io' },
+      ],
+    },
+    {
+      label: 'Further reading',
+      items: [
+        { name: 'Software Architecture Monday — Lesson 170', note: 'Mark Richards on managing code reuse in microservices', url: 'https://www.developertoarchitect.com/lessons/lesson170.html' },
+        { name: 'Sidecar pattern', note: 'Azure Architecture Center description of the pattern', url: 'https://learn.microsoft.com/azure/architecture/patterns/sidecar' },
+      ],
+    },
+  ],
+  'layered-architecture': [
+    {
+      label: 'Enforcing layers',
+      items: [
+        { name: 'ArchUnit layeredArchitecture()', note: 'Declares layers and which may access which', url: 'https://www.archunit.org' },
+        { name: 'jMolecules', note: 'Layer annotations (@DomainLayer, @InfrastructureLayer) for Java', url: 'https://github.com/xmolecules/jmolecules' },
+        { name: 'deptrac', note: 'PHP tool that checks layer dependencies', url: 'https://github.com/deptrac/deptrac' },
+      ],
+    },
+    {
+      label: 'Further reading',
+      items: [
+        { name: 'Software Architecture Monday — Lesson 158', note: 'Mark Richards on the layered architecture style', url: 'https://www.developertoarchitect.com/lessons/lesson158.html' },
+        { name: 'Presentation Domain Data Layering', note: 'Martin Fowler on the three classic layers and their limits', url: 'https://martinfowler.com/bliki/PresentationDomainDataLayering.html' },
+        { name: 'Patterns of Enterprise Application Architecture', note: 'Fowler’s catalogue of layering and persistence patterns', url: 'https://martinfowler.com/books/eaa.html' },
+      ],
+    },
+  ],
+  'service-based-architecture': [
+    {
+      label: 'Building blocks',
+      items: [
+        { name: 'Spring Boot', note: 'Each coarse domain service as its own deployable app', url: 'https://spring.io/projects/spring-boot' },
+        { name: 'PostgreSQL schemas', note: 'One logical schema per domain inside a shared database', url: 'https://www.postgresql.org/docs/current/ddl-schemas.html' },
+        { name: 'Flyway', note: 'Versioned migrations per domain schema', url: 'https://flywaydb.org' },
+      ],
+    },
+    {
+      label: 'Further reading',
+      items: [
+        { name: 'Software Architecture Monday — Lesson 163', note: 'Mark Richards on service-based architecture', url: 'https://www.developertoarchitect.com/lessons/lesson163.html' },
+        { name: 'Software Architecture Monday — Lesson 114', note: 'Microservices vs. service-based architecture', url: 'https://www.developertoarchitect.com/lessons/lesson114.html' },
+        { name: 'Software Architecture Monday — Lesson 153', note: 'Service-based architecture vs. SOA', url: 'https://www.developertoarchitect.com/lessons/lesson153.html' },
+      ],
+    },
+  ],
+  'microkernel-architecture': [
+    {
+      label: 'Plug-in frameworks',
+      items: [
+        { name: 'PF4J', note: 'Lightweight plug-in framework for Java', url: 'https://pf4j.org' },
+        { name: 'OSGi', note: 'Module and service runtime with hot-swappable bundles', url: 'https://www.osgi.org' },
+        { name: 'Apache Felix', note: 'Open-source OSGi implementation', url: 'https://felix.apache.org' },
+        { name: 'Extism', note: 'WebAssembly plug-ins callable from many host languages', url: 'https://extism.org' },
+      ],
+    },
+    {
+      label: 'Well-known microkernels',
+      items: [
+        { name: 'VS Code Extension API', note: 'Small editor core extended by thousands of extensions', url: 'https://code.visualstudio.com/api' },
+        { name: 'Eclipse IDE', note: 'Built on the Equinox OSGi runtime; nearly everything is a plug-in', url: 'https://www.eclipse.org/ide/' },
+        { name: 'Jenkins plugins', note: 'CI core whose features come from plug-ins', url: 'https://plugins.jenkins.io' },
+        { name: 'Drools', note: 'Rules engine often used for per-region rule plug-ins', url: 'https://www.drools.org' },
+      ],
+    },
+    {
+      label: 'Further reading',
+      items: [
+        { name: 'Software Architecture Monday — Lesson 160', note: 'Mark Richards on the microkernel style', url: 'https://www.developertoarchitect.com/lessons/lesson160.html' },
+        { name: 'Software Architecture Monday — Lesson 196', note: 'How modularity differs across architecture styles', url: 'https://www.developertoarchitect.com/lessons/lesson196.html' },
+      ],
+    },
+  ],
+  'space-based-architecture': [
+    {
+      label: 'In-memory data grids',
+      items: [
+        { name: 'Hazelcast', note: 'Replicated and partitioned maps embedded in processing units', url: 'https://hazelcast.com' },
+        { name: 'Apache Ignite', note: 'Distributed in-memory grid with SQL and compute', url: 'https://ignite.apache.org' },
+        { name: 'Apache Geode', note: 'In-memory data grid with asynchronous write-behind', url: 'https://geode.apache.org' },
+        { name: 'Oracle Coherence', note: 'Long-standing distributed cache and data grid', url: 'https://coherence.community' },
+        { name: 'GigaSpaces', note: 'Commercial platform rooted in tuple-space processing units', url: 'https://www.gigaspaces.com' },
+      ],
+    },
+    {
+      label: 'Further reading',
+      items: [
+        { name: 'Software Architecture Monday — Lesson 166', note: 'Mark Richards on space-based architecture', url: 'https://www.developertoarchitect.com/lessons/lesson166.html' },
+        { name: 'Software Architecture Monday — Lesson 174', note: 'Replicated caching and data collisions', url: 'https://www.developertoarchitect.com/lessons/lesson174.html' },
+      ],
+    },
+  ],
+  'orchestration-driven-soa': [
+    {
+      label: 'ESBs & integration platforms',
+      items: [
+        { name: 'MuleSoft Anypoint Platform', note: 'Commercial ESB and API-led integration platform', url: 'https://www.mulesoft.com' },
+        { name: 'WSO2 Micro Integrator', note: 'Open-source ESB-style integration and mediation runtime', url: 'https://wso2.com' },
+        { name: 'Apache Camel', note: 'Integration framework implementing the EIP catalogue', url: 'https://camel.apache.org' },
+        { name: 'IBM App Connect', note: 'Successor to IBM Integration Bus (formerly Message Broker)', url: 'https://www.ibm.com/products/app-connect' },
+      ],
+    },
+    {
+      label: 'Further reading',
+      items: [
+        { name: 'Software Architecture Monday — Lesson 164', note: 'Mark Richards on service-oriented architecture', url: 'https://www.developertoarchitect.com/lessons/lesson164.html' },
+        { name: 'Software Architecture Monday — Lesson 39', note: 'Integration hubs (ESBs)', url: 'https://www.developertoarchitect.com/lessons/lesson39.html' },
+        { name: 'Software Architecture Monday — Lesson 154', note: 'Is an ESB still relevant today?', url: 'https://www.developertoarchitect.com/lessons/lesson154.html' },
+        { name: 'Enterprise Integration Patterns', note: 'Hohpe & Woolf’s catalogue of messaging and mediation patterns', url: 'https://www.enterpriseintegrationpatterns.com' },
+      ],
+    },
+  ],
+  'orchestration-vs-choreography': [
+    {
+      label: 'Orchestration engines',
+      items: [
+        { name: 'Temporal', note: 'Durable workflows as code with retries and compensation', url: 'https://temporal.io' },
+        { name: 'Camunda', note: 'BPMN process orchestration with visual monitoring', url: 'https://camunda.com' },
+        { name: 'AWS Step Functions', note: 'Managed state machines coordinating AWS services', url: 'https://aws.amazon.com/step-functions/' },
+        { name: 'Conductor OSS', note: 'Netflix-born orchestrator for microservice workflows', url: 'https://conductor-oss.org' },
+      ],
+    },
+    {
+      label: 'Choreography backbones',
+      items: [
+        { name: 'Apache Kafka', note: 'Topics that services publish to and react on', url: 'https://kafka.apache.org' },
+        { name: 'Amazon EventBridge', note: 'Event bus with rule-based routing to consumers', url: 'https://aws.amazon.com/eventbridge/' },
+      ],
+    },
+    {
+      label: 'Further reading',
+      items: [
+        { name: 'Mark Richards — Lesson 23', note: 'Software Architecture Monday: orchestration vs. choreography', url: 'https://www.developertoarchitect.com/lessons/lesson23.html' },
+        { name: 'Saga pattern (microservices.io)', note: 'Orchestrated and choreographed sagas compared', url: 'https://microservices.io/patterns/data/saga.html' },
+        { name: 'Process Manager (EIP)', note: 'The classic pattern for a central workflow coordinator', url: 'https://www.enterpriseintegrationpatterns.com/patterns/messaging/ProcessManager.html' },
+      ],
+    },
+  ],
+  'request-reply-messaging': [
+    {
+      label: 'Broker & framework support',
+      items: [
+        { name: 'RabbitMQ direct reply-to', note: 'Pseudo-queue for replies without declaring a queue per request', url: 'https://www.rabbitmq.com/docs/direct-reply-to' },
+        { name: 'Spring AMQP request/reply', note: 'RabbitTemplate.sendAndReceive with correlation handling', url: 'https://docs.spring.io/spring-amqp/reference/amqp/request-reply.html' },
+        { name: 'Spring Kafka ReplyingKafkaTemplate', note: 'Request/reply over Kafka topics with correlation headers', url: 'https://docs.spring.io/spring-kafka/reference/kafka/sending-messages.html' },
+        { name: 'NATS request-reply', note: 'Built-in inbox subjects for replies', url: 'https://docs.nats.io/nats-concepts/core-nats/reqreply' },
+      ],
+    },
+    {
+      label: 'Further reading',
+      items: [
+        { name: 'Request-Reply & Correlation Identifier (EIP)', note: 'The original pattern descriptions', url: 'https://www.enterpriseintegrationpatterns.com/patterns/messaging/RequestReply.html' },
+        { name: 'Mark Richards — Lesson 142', note: 'Request/reply vs. async notification', url: 'https://www.developertoarchitect.com/lessons/lesson142.html' },
+        { name: 'Mark Richards — Lesson 137', note: 'REST vs. messaging trade-offs', url: 'https://www.developertoarchitect.com/lessons/lesson137.html' },
+      ],
+    },
+  ],
+  'events-vs-messages': [
+    {
+      label: 'Describing events',
+      items: [
+        { name: 'CloudEvents', note: 'CNCF spec for a common event envelope', url: 'https://cloudevents.io' },
+        { name: 'AsyncAPI', note: 'Documents channels, messages and payload schemas', url: 'https://www.asyncapi.com' },
+        { name: 'Confluent Schema Registry', note: 'Central schemas for event payloads on Kafka', url: 'https://docs.confluent.io/platform/current/schema-registry/fundamentals/schema-evolution.html' },
+      ],
+    },
+    {
+      label: 'Further reading',
+      items: [
+        { name: 'Mark Richards — Lesson 175', note: 'Events vs. messages', url: 'https://www.developertoarchitect.com/lessons/lesson175.html' },
+        { name: 'Mark Richards — Lessons 199 & 198', note: 'Anemic events and the swarm-of-gnats anti-pattern', url: 'https://www.developertoarchitect.com/lessons/lesson199.html' },
+        { name: 'Mark Richards — Lesson 105', note: 'Stamp coupling', url: 'https://www.developertoarchitect.com/lessons/lesson105.html' },
+        { name: 'Martin Fowler — What do you mean by “Event-Driven”?', note: 'Notification vs. event-carried state transfer', url: 'https://martinfowler.com/articles/201701-event-driven.html' },
+      ],
+    },
+  ],
+  'contract-versioning': [
+    {
+      label: 'Contract testing',
+      items: [
+        { name: 'Pact', note: 'Consumer-driven contract tests across languages', url: 'https://docs.pact.io' },
+        { name: 'Spring Cloud Contract', note: 'Provider contracts that generate stubs and tests', url: 'https://spring.io/projects/spring-cloud-contract' },
+      ],
+    },
+    {
+      label: 'Breaking-change detection',
+      items: [
+        { name: 'Buf breaking', note: 'Fails the build on incompatible Protobuf changes', url: 'https://buf.build/docs/breaking/' },
+        { name: 'oasdiff', note: 'Detects breaking changes between OpenAPI versions', url: 'https://www.oasdiff.com' },
+        { name: 'Schema Registry compatibility', note: 'BACKWARD/FORWARD/FULL rules for Avro, Protobuf, JSON Schema', url: 'https://docs.confluent.io/platform/current/schema-registry/fundamentals/schema-evolution.html' },
+      ],
+    },
+    {
+      label: 'Further reading',
+      items: [
+        { name: 'Mark Richards — Lesson 41', note: 'Microservices contract versioning', url: 'https://www.developertoarchitect.com/lessons/lesson41.html' },
+        { name: 'Mark Richards — Lesson 147', note: 'The fallacies of versioning', url: 'https://www.developertoarchitect.com/lessons/lesson147.html' },
+      ],
+    },
+  ],
+  'guaranteed-delivery': [
+    {
+      label: 'Broker settings',
+      items: [
+        { name: 'RabbitMQ publisher confirms & consumer acks', note: 'Broker confirms receipt; consumers ack after processing', url: 'https://www.rabbitmq.com/docs/confirms' },
+        { name: 'RabbitMQ quorum queues', note: 'Replicated, durable queues based on Raft', url: 'https://www.rabbitmq.com/docs/quorum-queues' },
+        { name: 'Kafka acks=all', note: 'Producer waits for all in-sync replicas; pair with idempotence', url: 'https://kafka.apache.org/documentation/#producerconfigs_acks' },
+      ],
+    },
+    {
+      label: 'Closing the gaps',
+      items: [
+        { name: 'Debezium outbox event router', note: 'Publishes outbox rows committed with business data', url: 'https://debezium.io/documentation/reference/stable/transformations/outbox-event-router.html' },
+        { name: 'Guaranteed Delivery (EIP)', note: 'Store-and-forward pattern description', url: 'https://www.enterpriseintegrationpatterns.com/patterns/messaging/GuaranteedMessaging.html' },
+      ],
+    },
+    {
+      label: 'Further reading',
+      items: [
+        { name: 'Mark Richards — Lesson 70', note: 'Preventing data loss when using messaging', url: 'https://www.developertoarchitect.com/lessons/lesson70.html' },
+        { name: 'Mark Richards — Lesson 121', note: 'Transacted messages', url: 'https://www.developertoarchitect.com/lessons/lesson121.html' },
+      ],
+    },
+  ],
+  'workflow-event-pattern': [
+    {
+      label: 'Error handling & repair tooling',
+      items: [
+        { name: 'ServiceControl & ServicePulse', note: 'Collects failed messages, lets operators edit and retry', url: 'https://docs.particular.net/servicecontrol/' },
+        { name: 'Spring Kafka retry topics', note: 'Routes failures to retry and dead-letter topics', url: 'https://docs.spring.io/spring-kafka/reference/retrytopic.html' },
+        { name: 'Camunda Tasklist', note: 'Human tasks for cases automation cannot fix', url: 'https://docs.camunda.io/docs/components/tasklist/introduction-to-tasklist/' },
+      ],
+    },
+    {
+      label: 'Further reading',
+      items: [
+        { name: 'Mark Richards — Lesson 81', note: 'Workflow event pattern', url: 'https://www.developertoarchitect.com/lessons/lesson81.html' },
+        { name: 'Enterprise Integration Patterns — Invalid Message Channel', note: 'Where unprocessable messages go instead of vanishing', url: 'https://www.enterpriseintegrationpatterns.com/patterns/messaging/InvalidMessageChannel.html' },
+      ],
+    },
+  ],
+  'ambulance-pattern': [
+    {
+      label: 'Priority channels',
+      items: [
+        { name: 'Priority Queue pattern (Azure)', note: 'Separate queues and consumer pools per priority', url: 'https://learn.microsoft.com/azure/architecture/patterns/priority-queue' },
+        { name: 'RabbitMQ priority queues', note: 'In-queue priorities when a separate queue is overkill', url: 'https://www.rabbitmq.com/docs/priority' },
+        { name: 'Celery task routing', note: 'Route urgent tasks to dedicated queues and workers', url: 'https://docs.celeryq.dev/en/stable/userguide/routing.html' },
+        { name: 'Sidekiq queues', note: 'Strict or weighted queue ordering per worker', url: 'https://github.com/sidekiq/sidekiq/wiki/Advanced-Options' },
+      ],
+    },
+    {
+      label: 'Further reading',
+      items: [
+        { name: 'Mark Richards — Lesson 56', note: 'The ambulance pattern', url: 'https://www.developertoarchitect.com/lessons/lesson56.html' },
+        { name: 'Mark Richards — Lesson 46', note: 'Introduction to the reactive architecture patterns', url: 'https://www.developertoarchitect.com/lessons/lesson46.html' },
+      ],
+    },
+  ],
+  'supervisor-consumer': [
+    {
+      label: 'Scaling consumers on load',
+      items: [
+        { name: 'KEDA', note: 'Scales Kubernetes workloads on queue length or Kafka lag', url: 'https://keda.sh' },
+        { name: 'AWS Lambda with SQS', note: 'Pollers scale up and down with queue depth', url: 'https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html' },
+        { name: 'Spring AMQP listener concurrency', note: 'Consumers grow from a minimum to a maximum on demand', url: 'https://docs.spring.io/spring-amqp/reference/amqp/listener-concurrency.html' },
+      ],
+    },
+    {
+      label: 'Throttling producers',
+      items: [
+        { name: 'RabbitMQ flow control', note: 'Slows publishers that outpace the broker', url: 'https://www.rabbitmq.com/docs/flow-control' },
+        { name: 'RabbitMQ blocked connections', note: 'Publishers blocked on memory or disk alarms', url: 'https://www.rabbitmq.com/docs/connection-blocked' },
+      ],
+    },
+    {
+      label: 'Further reading',
+      items: [
+        { name: 'Mark Richards — Lesson 217', note: 'Supervisor-consumer pattern', url: 'https://www.developertoarchitect.com/lessons/lesson217.html' },
+        { name: 'Mark Richards — Lesson 218', note: 'Thread delegate pattern', url: 'https://www.developertoarchitect.com/lessons/lesson218.html' },
+        { name: 'Mark Richards — Lesson 171', note: 'Producer control flow pattern', url: 'https://www.developertoarchitect.com/lessons/lesson171.html' },
+      ],
+    },
+  ],
+  'cap-theorem': [
+    {
+      label: 'Tunable consistency in practice',
+      items: [
+        { name: 'DynamoDB read consistency', note: 'Eventually vs. strongly consistent reads per request', url: 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html' },
+        { name: 'Apache Cassandra', note: 'Per-query consistency levels such as ONE and QUORUM', url: 'https://cassandra.apache.org/doc/latest/cassandra/architecture/dynamo.html' },
+        { name: 'Jepsen', note: 'Tests what databases really do under partitions', url: 'https://jepsen.io' },
+      ],
+    },
+    {
+      label: 'Further reading',
+      items: [
+        { name: 'Eric Brewer — CAP twelve years later', note: 'The author revisits what the theorem means', url: 'https://www.infoq.com/articles/cap-twelve-years-later-how-the-rules-have-changed/' },
+        { name: 'Daniel Abadi — PACELC paper', note: 'Adds the latency vs. consistency trade-off', url: 'https://www.cs.umd.edu/~abadi/papers/abadi-pacelc.pdf' },
+        { name: 'Spanner, TrueTime and the CAP theorem', note: 'How Google runs an “effectively CA” CP system', url: 'https://research.google/pubs/spanner-truetime-and-the-cap-theorem/' },
+        { name: 'Mark Richards — Lessons 111 & 149', note: 'CAP illustrated, and CAP applied to caching', url: 'https://www.developertoarchitect.com/lessons/lesson111.html' },
+      ],
+    },
+  ],
+  'caching-topologies': [
+    {
+      label: 'In-process & near cache',
+      items: [
+        { name: 'Caffeine', note: 'High-performance in-process cache for the JVM', url: 'https://github.com/ben-manes/caffeine' },
+        { name: 'Hazelcast near cache', note: 'Local copy of hot entries in front of the cluster', url: 'https://docs.hazelcast.com/hazelcast/latest/cluster-performance/near-cache' },
+        { name: 'Redis client-side caching', note: 'Server-assisted invalidation of local copies', url: 'https://redis.io/docs/latest/develop/reference/client-side-caching/' },
+      ],
+    },
+    {
+      label: 'Distributed cache',
+      items: [
+        { name: 'Redis', note: 'Client/server cache with replication and clustering', url: 'https://redis.io' },
+        { name: 'Memcached', note: 'Simple, fast distributed key-value cache', url: 'https://memcached.org' },
+      ],
+    },
+    {
+      label: 'Replicated cache / in-memory data grid',
+      items: [
+        { name: 'Hazelcast', note: 'Replicated and partitioned maps embedded in the app', url: 'https://hazelcast.com' },
+        { name: 'Apache Ignite', note: 'Data grid with replicated and partitioned caches', url: 'https://ignite.apache.org' },
+        { name: 'Apache Geode', note: 'Data grid with replicated regions (GemFire lineage)', url: 'https://geode.apache.org' },
+        { name: 'Mark Richards — Lessons 80 & 174', note: 'Choosing a topology; collisions in replicated caches', url: 'https://www.developertoarchitect.com/lessons/lesson80.html' },
+      ],
+    },
+  ],
+  'microservices-reporting': [
+    {
+      label: 'Push & batch pipelines',
+      items: [
+        { name: 'Debezium', note: 'CDC streams service data into the reporting store', url: 'https://debezium.io' },
+        { name: 'Airbyte', note: 'Open-source ELT connectors into a warehouse', url: 'https://airbyte.com' },
+        { name: 'dbt', note: 'SQL transformations that build reporting models', url: 'https://www.getdbt.com' },
+      ],
+    },
+    {
+      label: 'Reporting stores',
+      items: [
+        { name: 'ClickHouse', note: 'Columnar database for fast analytical queries', url: 'https://clickhouse.com' },
+        { name: 'Apache Pinot', note: 'Real-time OLAP fed directly from Kafka', url: 'https://pinot.apache.org' },
+      ],
+    },
+    {
+      label: 'Further reading',
+      items: [
+        { name: 'Mark Richards — Lesson 13', note: 'Microservices and reporting', url: 'https://www.developertoarchitect.com/lessons/lesson13.html' },
+        { name: 'Zhamak Dehghani — Data mesh principles', note: 'Domain-owned analytical data products', url: 'https://martinfowler.com/articles/data-mesh-principles.html' },
+      ],
+    },
+  ],
 }
 
 /** Flat list of example names for a concept (used by search). */

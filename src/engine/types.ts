@@ -27,6 +27,7 @@ export type ComponentKind =
   | 'service'
   | 'monolith'
   | 'module'
+  | 'plugin'
   | 'worker'
   | 'function'
   | 'orchestrator'
@@ -100,6 +101,9 @@ export type ArchStyle =
   | 'microservices'
   | 'event-driven'
   | 'serverless'
+  | 'service-based'
+  | 'space-based'
+  | 'microkernel'
 
 export type CommunicationStyle = 'sync' | 'async' | 'hybrid'
 export type DataStrategy = 'shared' | 'per-service' | 'cqrs'

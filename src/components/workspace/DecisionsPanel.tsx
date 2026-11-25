@@ -7,11 +7,14 @@ import { cn } from '../../lib/cn'
 import { useWorkspace } from '../../store/workspace'
 
 const STYLE_INFO: Record<ArchStyle, string> = {
-  monolith: 'One deployable, one codebase, simplest to run.',
+  monolith: 'One deployable split into technical layers — simplest to run.',
   'modular-monolith': 'One deployable with strictly separated modules.',
   microservices: 'Independently deployable services, each owning its data.',
   'event-driven': 'Services collaborate mainly through events on a broker.',
   serverless: 'Event-triggered functions and managed services.',
+  'service-based': 'A handful of coarse domain services, often sharing one database.',
+  'space-based': 'Processing units with an in-memory data grid for extreme, spiky load.',
+  microkernel: 'A core system extended by isolated plug-ins (rules, adapters).',
 }
 
 function Segmented<T extends string>({ value, options, onChange }: { value?: T; options: { id: T; label: string }[]; onChange: (v: T) => void }) {

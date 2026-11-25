@@ -64,6 +64,11 @@ export const COMPONENT_DETAILS: Record<ComponentKind, ComponentDetails> = {
     useWhen: 'Building a modular monolith, or preparing boundaries before extracting services.',
     concepts: ['modular-monolith', 'bounded-context'],
   },
+  plugin: {
+    details: 'An optional extension loaded by a core application — a country-specific rule set, a payment adapter, a document parser. It implements a stable plug-in contract, is discovered through a registry, and talks only to the core, never to other plug-ins.',
+    useWhen: 'The core rarely changes but behaviour varies per customer, region or product and must be added without touching the core (microkernel).',
+    concepts: ['microkernel-architecture', 'contract-versioning'],
+  },
   worker: {
     details: 'A process that consumes jobs or events from a queue and does slow or heavy work outside the user’s request: sending emails, resizing images, generating reports, calling flaky partners with retries.',
     useWhen: 'Work is slow, bursty, retryable or doesn’t need to finish before responding.',

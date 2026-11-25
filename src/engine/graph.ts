@@ -2,7 +2,7 @@ import { TECH_BY_ID } from '../data/tech'
 import type { ComponentKind, Decisions, Diagram, DiagramEdge, DiagramNode, Protocol } from './types'
 import { SYNC_PROTOCOLS } from './types'
 
-export const COMPUTE_KINDS: ComponentKind[] = ['service', 'monolith', 'module', 'worker', 'function', 'orchestrator', 'bff']
+export const COMPUTE_KINDS: ComponentKind[] = ['service', 'monolith', 'module', 'plugin', 'worker', 'function', 'orchestrator', 'bff']
 export const DEPLOYABLE_KINDS: ComponentKind[] = ['service', 'monolith', 'function']
 export const CLIENT_KINDS: ComponentKind[] = ['web-app', 'mobile-app']
 export const DATA_KINDS: ComponentKind[] = [
@@ -212,6 +212,11 @@ export class Graph {
     return [...out.values()]
   }
 
+  /** Plug-ins that call other plug-ins directly (microkernel plug-ins should only talk to the core). */
+  pluginCrossTalk(): { from: DiagramNode; to: DiagramNode }[] {
+    return this.ofKind('plugin').flatMap((p) => this.targets(p.id, SYNC_PROTOCOLS).filter((t) => t.kind === 'plugin').map((to) => ({ from: p, to })))
+  }
+
   /** Root deployable of a node (module → its monolith). */
   deployable(n: DiagramNode): DiagramNode {
     const p = this.parent(n)
@@ -222,7 +227,7 @@ export class Graph {
   sharedDatabases(): { store: DiagramNode; services: DiagramNode[] }[] {
     const result: { store: DiagramNode; services: DiagramNode[] }[] = []
     for (const store of this.ofKind(...DB_KINDS)) {
-      const accessors = this.sources(store.id, ['data']).filter((s) => s.kind === 'service' || s.kind === 'monolith' || s.kind === 'module')
+      const accessors = this.sources(store.id, ['data']).filter((s) => s.kind === 'service' || s.kind === 'monolith' || s.kind === 'module' || s.kind === 'plugin')
       const units = new Map<string, DiagramNode>()
       for (const a of accessors) {
         const d = this.deployable(a)
@@ -239,7 +244,7 @@ export class Graph {
    * modules of the same deployable are in-process, so they are not network hops.
    */
   longestSyncChain(): DiagramNode[] {
-    const compute = new Set(this.ofKind('service', 'function', 'bff', 'monolith', 'module').map((n) => n.id))
+    const compute = new Set(this.ofKind('service', 'function', 'bff', 'monolith', 'module', 'plugin').map((n) => n.id))
     let best: string[] = []
     const dfs = (id: string, path: string[]) => {
       if (path.length > best.length) best = [...path]

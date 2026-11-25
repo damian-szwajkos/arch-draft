@@ -120,6 +120,12 @@ export const parcelLockers: Scenario = {
       'This is what failed last Black Friday: one overloaded API took tracking, label printing and door opening down together.',
     serverless:
       'Managed MQTT (IoT Core) plus functions handle the fleet, label rendering and notification fan-out well, but a steady 90k req/s of tracking reads and ordered parcel streams are cheaper and more predictable on long-running consumers.',
+    'service-based':
+      'Coarse services sharing one parcel database would let the 90k req/s tracking spike reach the write database again — last Black Friday’s outage. Seven squads with very different peaks need separate data and events.',
+    'space-based':
+      'A grid could soak up tracking reads, but a read model behind a CDN does that more cheaply. The locker side is about offline devices and desired state, which MQTT and a device shadow solve, not in-memory processing units.',
+    microkernel:
+      'Locker firmware may use plug-ins for hardware variants, but the backend is several equally important domains with different peaks; one plug-in host would put them back into a single failure domain.',
   },
   hints: [
     'Start with the lockers: they sit behind cellular NAT and drop offline. Should they poll your API, or keep one connection open to a broker built for devices?',

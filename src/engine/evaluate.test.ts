@@ -124,3 +124,51 @@ describe('graph engine', () => {
     expect(bad.clientsEnterThrough(['api-gateway']).pass).toBe(false)
   })
 })
+
+describe('new architecture styles', () => {
+  const sharedDb = async () => {
+    const { diagram } = await import('../data/scenarios/builder')
+    return diagram(
+      [
+        ['a', 'service', 'A', 0, 0],
+        ['b', 'service', 'B', 0, 0],
+        ['c', 'service', 'C', 0, 0],
+        ['d', 'service', 'D', 0, 0],
+        ['db', 'relational-db', 'DB', 0, 0],
+      ],
+      [['a', 'db'], ['b', 'db'], ['c', 'db'], ['d', 'db']],
+    )
+  }
+  const result = (d: Awaited<ReturnType<typeof sharedDb>>, style: Parameters<typeof evaluateScenario>[2]['style'], id: string) =>
+    evaluateScenario(SCENARIOS[0], d, { style, stack: {} }).results.find((r) => r.id === id)
+
+  it('service-based accepts a shared database; microservices does not', async () => {
+    const d = await sharedDb()
+    expect(result(d, 'service-based', 'anti-shared-db')?.pass).toBe(true)
+    expect(result(d, 'microservices', 'anti-shared-db')?.pass).toBe(false)
+    expect(result(d, 'service-based', 'style-consistency')?.pass).toBe(true)
+  })
+
+  it('space-based needs processing units, a data grid, data pumps and data writers', async () => {
+    const { diagram } = await import('../data/scenarios/builder')
+    const partial = diagram([['pu', 'service', 'PU', 0, 0], ['grid', 'cache', 'Grid', 0, 0]], [['pu', 'grid']])
+    expect(result(partial, 'space-based', 'style-consistency')?.pass).toBe(false)
+    const full = diagram(
+      [['pu', 'service', 'PU', 0, 0], ['grid', 'cache', 'Grid', 0, 0], ['pump', 'broker', 'Pump', 0, 0], ['writer', 'worker', 'Writer', 0, 0]],
+      [['pu', 'grid'], ['pu', 'pump', 'event'], ['pump', 'writer', 'event']],
+    )
+    expect(result(full, 'space-based', 'style-consistency')?.pass).toBe(true)
+  })
+
+  it('microkernel needs a core application with plug-ins and flags plug-in cross-talk', async () => {
+    const { diagram } = await import('../data/scenarios/builder')
+    const { Graph } = await import('./graph')
+    const d = diagram(
+      [['core', 'monolith', 'Core', 0, 0], ['p1', 'plugin', 'PL', 0, 0, { parent: 'core' }], ['p2', 'plugin', 'DE', 0, 0, { parent: 'core' }]],
+      [['p1', 'p2', 'http']],
+    )
+    expect(result(d, 'microkernel', 'style-consistency')?.pass).toBe(true)
+    expect(new Graph(d).pluginCrossTalk().map((x) => x.from.id)).toEqual(['p1'])
+    expect(new Graph(d).longestSyncChain().length).toBeLessThanOrEqual(1)
+  })
+})

@@ -160,7 +160,7 @@ export const insurerStrangler: Scenario = {
     { id: 'billing', label: 'Billing', description: 'Recurring premiums and invoices (legacy)' },
     { id: 'customers', label: 'Customers', description: 'Customer master data (legacy)' },
   ],
-  recommendedStyles: ['event-driven', 'microservices'],
+  recommendedStyles: ['event-driven', 'microservices', 'service-based'],
   styleFeedback: {
     'event-driven':
       'Great fit: change events streamed out of Oracle feed the new Quotes service, and accepted quotes flow back as events — new and old stay decoupled while you extract slice by slice.',
@@ -172,6 +172,12 @@ export const insurerStrangler: Scenario = {
       'Adding online quote & buy inside PolisaCore ties the new journey to the monthly release train, the nightly batch and the 1,400-table schema — exactly what the business is trying to escape.',
     serverless:
       'Functions could host small slices, but quote pricing needs warm tariff caches and steady p95 latency, and a Java team migrating a JVM monolith gains little from cold-start-sensitive FaaS here.',
+    'service-based':
+      'Good fit: carving the business into a handful of coarse domain services — Quotes and Payments first, PolisaCore treated as one big service for the rest — is a pragmatic target for 18 developers. Just never let the new services share PolisaCore’s Oracle schema: give them their own data and sync legacy data through CDC.',
+    'space-based':
+      '60 rps peaks after TV ads do not need an in-memory data grid. The hard part is escaping the legacy schema and release train, not extreme concurrency.',
+    microkernel:
+      'PolisaCore could in theory become a core with product plug-ins, but that means deep changes to a monolith that ships monthly under an audit freeze — the opposite of strangling it from the outside.',
   },
   starter: diagram(starterNodes, starterEdges),
   starterDecisions: {

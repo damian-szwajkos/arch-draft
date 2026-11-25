@@ -49,6 +49,12 @@ export const social: Scenario = {
     'modular-monolith': 'Reasonable at MVP stage, but timeline fan-out has radically different scaling needs from the rest at 3M DAU.',
     monolith: 'The monolith is the thing falling over every evening.',
     serverless: 'Fan-out to millions of timelines via functions gets expensive and hard to control; long-lived WebSockets don’t fit either.',
+    'service-based':
+      'A few coarse services over a shared PostgreSQL would recreate the MVP’s bottleneck — fan-out writes and timeline reads hitting one database every evening. Timeline needs its own store and its own scaling.',
+    'space-based':
+      'Precomputed timelines in a cache are already the in-memory part. Replicated grids with write-behind for 3M daily users are costly and make celebrity fan-out harder to control.',
+    microkernel:
+      'Timeline, graph and search are all central and scale differently — none is an optional extension of a small core.',
   },
   hints: [
     'Photos belong in object storage, served via a CDN. Your services only store metadata.',

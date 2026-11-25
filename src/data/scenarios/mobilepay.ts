@@ -93,6 +93,12 @@ export const mobilePayScheme: Scenario = {
       'The pilot monolith already froze at 90 TPS. A national scheme for 12 banks needs isolated failure domains and independent scaling of the hot path.',
     serverless:
       'Tempting for the Black Friday spike, but cold starts that pay a fresh mTLS handshake to the bank, connection pools that reset whenever instances scale out, and 60-second stateful payment flows put the < 2 s, 99.99% path at risk. Functions fit peripheral jobs such as webhook delivery.',
+    'service-based':
+      'Coarse services over a shared database couple the 99.99% authorisation path to settlement batches through one store — a heavy clearing query becomes a slow payment. The hot path needs its own data and failure domain.',
+    'space-based':
+      '300 TPS is not the extreme concurrency a data grid exists for, and write-behind persistence is the wrong trade-off for money: the final yes/no and the ledger entry must be durable before you answer.',
+    microkernel:
+      'A switch core with one adapter plug-in per bank is a sound internal design for bank connectivity, but as the system style it would run fraud, result delivery and settlement in the same process as authorisation.',
   },
   hints: [
     'Start with the partners: acquirers and issuing banks are Third-party API nodes, and both enter through one hardened partner gateway (mTLS, rate limits per partner).',

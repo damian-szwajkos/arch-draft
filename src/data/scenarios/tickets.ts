@@ -41,13 +41,19 @@ export const tickets: Scenario = {
     { id: 'payments', label: 'Payments', description: 'Charges and webhooks' },
     { id: 'notifications', label: 'Notifications', description: 'Ticket emails' },
   ],
-  recommendedStyles: ['microservices', 'event-driven'],
+  recommendedStyles: ['microservices', 'event-driven', 'space-based'],
   styleFeedback: {
     microservices: 'Good: waiting room and seat holds need to scale massively for minutes, while booking needs strict correctness — separate deployables help.',
     'event-driven': 'Good: payment confirmations and ticket issuing flow naturally as events.',
     'modular-monolith': 'Workable for normal days, but the on-sale spike hits a few capabilities 100× harder than others.',
     monolith: 'Last year’s monolith crashed within 30 seconds.',
     serverless: 'Functions scale, but cold starts and DB connection storms at 500k users are dangerous without a waiting room.',
+    'service-based':
+      'Coarse services sharing one database put the waiting room, seat holds and booking on the same store during a 100× spike — the database becomes the thing every fan races for. Split the hot paths and their data.',
+    'space-based':
+      'Strong fit — an on-sale is the classic case for this style: processing units keep seat holds and admission tokens in a partitioned in-memory grid (each seat has one owner — a replicated grid can let two units hold the same seat) and scale out for the on-sale. The final booking after payment still commits synchronously to PostgreSQL with the unique (show, seat) constraint, while holds and other state persist through data pumps and writers.',
+    microkernel:
+      'A plug-in core does nothing for a two-minute spike — the core process would still take all 500k users. This is a scaling and contention problem, not an extensibility one.',
   },
   hints: [
     'Absorb the spike before it reaches your services: CDN for static content, bot protection at the edge, rate limiting at the gateway.',

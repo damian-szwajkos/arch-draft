@@ -228,6 +228,12 @@ export const retailBff: Scenario = {
       'The single generic API is exactly what is slowing down three UI teams today. Going back to one deployable makes the bottleneck bigger.',
     serverless:
       'BFFs can run as functions, but each product view fans out to five services, and cold starts plus connection limits work against a sub-800 ms mobile target. Pick long-running BFF services as your main style.',
+    'service-based':
+      'The five domain services already exist with their own databases, so there is nothing to reshape into coarse services over a shared store. The work is the per-frontend layer in front of them, which this style says nothing about.',
+    'space-based':
+      'Space-based targets extreme concurrent writes to shared state. A product screen is a read-heavy aggregation at ~1,800 rps — a cache in each BFF gives the speed without a data grid, data pumps and writers.',
+    microkernel:
+      'Treating web, mobile and kiosk as plug-ins of one shared API recreates the single generic contract that makes three UI teams wait on each other. Separate BFFs, each owned by its UI team, are the point.',
   },
   starter: diagram(starterNodes, starterEdges),
   starterDecisions: { stack: { frontend: 'react', mobile: 'react-native', backend: 'spring-boot', database: 'postgres' } },

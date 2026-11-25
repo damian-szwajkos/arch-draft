@@ -47,6 +47,12 @@ export const shopfront: Scenario = {
     microservices: 'Over-engineered: 3 developers would spend their time on deployment pipelines, network failures and distributed data instead of the shop.',
     'event-driven': 'Event-driven microservices bring brokers, eventual consistency and many deployables — too much for a 3-person team.',
     serverless: 'Possible, but splitting checkout across many functions makes the core flow hard to reason about and test for this team.',
+    'service-based':
+      'Too early: even four coarse services over one database mean several pipelines and deployments for three developers with no ops. Start with modules — service-based is a natural next step if the marketplace takes off.',
+    'space-based':
+      'Built for huge, unpredictable concurrency. ~5k daily visitors are served by a CDN and one database, no data grid required.',
+    microkernel:
+      'The future marketplace might bring plug-in-like extensions (payment or shipping providers per maker), but a core with plug-ins today is speculative design for a three-person team.',
   },
   hints: [
     'Start with one Application container and drop Modules inside it for each capability.',

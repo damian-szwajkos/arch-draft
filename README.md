@@ -13,24 +13,28 @@ PostgreSQL or MongoDB, Redis…), record your decisions, and get an instant revi
 
 ## Features
 
-- **20 scenarios** across three levels, each modelled on public engineering write-ups (Allegro, InPost,
-  BLIK, PKO BP, Booksy, Docplanner, Stripe, Adyen, Monzo, Uber, Shopify, Slack, Segment, LMAX…):
+- **25 scenarios** across three levels, each modelled on public engineering write-ups (Allegro, InPost,
+  BLIK, PKO BP, Booksy, Docplanner, Stripe, Adyen, Monzo, Uber, Shopify, Slack, Segment, LMAX…) and Mark Richards’
+  [Software Architecture Monday](https://www.developertoarchitect.com/lessons/) lessons:
   - *Beginner* — indie web shop, URL shortener, doctor booking (double-booking), notification platform,
-    public API rate limiting & idempotency, Backend-for-Frontend.
+    public API rate limiting & idempotency, Backend-for-Frontend, microkernel payroll with country plug-ins.
   - *Intermediate* — observability retrofit, video courses, social feed, food delivery, parcel-locker IoT
     network, strangler-fig migration of an insurer monolith, multi-tenant SaaS (silo/pool), consolidating
-    150 microservices back into one worker.
+    150 microservices back into one worker, service-based van rental, lab results with priority channels and
+    a workflow-event repair flow, cross-domain reporting without database pull.
   - *Advanced* — ticket flash sale, neobank ledger, national 6-digit mobile payment scheme, cell-based
-    architecture, exchange matching engine, exactly-once ad-click billing.
-- **Diagram workspace** built on React Flow: 37 component types (including IoT devices), containers for modular monoliths
-  and bounded contexts, 7 communication types (REST, gRPC, GraphQL, WebSocket, events, data, telemetry).
-- **170+ technologies** with trade-off notes and machine-readable traits the reviewer reasons about
+    architecture, exchange matching engine, exactly-once ad-click billing, space-based live auctions.
+- **Diagram workspace** built on React Flow: 38 component types (including IoT devices and plug-ins), containers for
+  modular monoliths, microkernels and bounded contexts, 7 communication types (REST, gRPC, GraphQL, WebSocket, events, data, telemetry).
+- **180 technologies** with trade-off notes and machine-readable traits the reviewer reasons about
   (e.g. Kafka is *replayable*, RabbitMQ is a *queue*, Redis supports *geo* and *TTL*).
-- **Decisions panel** — architecture style, communication, data strategy, stack preferences and an ADR rationale.
+- **Decisions panel** — eight architecture styles (layered, modular monolith, microkernel, service-based,
+  microservices, event-driven, space-based, serverless), communication, data strategy, stack preferences and an ADR rationale.
 - **Instant review** — key requirements, bonus points and anti-pattern detection (shared databases,
   clients hitting the DB, long synchronous chains), and a 0–100 score.
 - **Reference solutions** with walkthroughs, loadable into your canvas.
-- **Concept library** — 45 patterns (saga, outbox, CQRS, cells, multi-tenancy, stream processing, SLOs…)
+- **Concept library** — 69 concepts (saga, outbox, CQRS, cells, architectural quantum, fitness functions,
+  caching topologies, the ambulance and workflow-event patterns, SLOs…)
   linked from every check, each with example libraries and tools per ecosystem.
 - **Sandbox** mode with architecture lint, PNG / JSON export and JSON import.
 - **No backend, no auth** — progress and diagrams autosave in `localStorage`.

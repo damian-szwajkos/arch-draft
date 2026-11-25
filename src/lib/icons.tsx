@@ -1,5 +1,5 @@
 import {
-  Activity, Archive, BarChart3, BellRing, Box, Cog, Cpu, Database, FileJson, Gauge, Globe, KeyRound,
+  Activity, Archive, BarChart3, Blocks, BellRing, Box, Cog, Cpu, Database, FileJson, Gauge, Globe, KeyRound,
   LayoutDashboard, Layers, Lock, MemoryStick, Monitor, Package, Plug, Puzzle, Radio, RefreshCw, Router,
   Rows3, Rss, Satellite, ScrollText, Search, Share2, Shield, Smartphone, Split, SquareDashed, StickyNote,
   Workflow, Zap, Route, type LucideIcon,
@@ -18,6 +18,7 @@ export const KIND_ICON: Record<ComponentKind, LucideIcon> = {
   service: Box,
   monolith: Package,
   module: Puzzle,
+  plugin: Blocks,
   worker: Cog,
   function: Zap,
   orchestrator: Workflow,

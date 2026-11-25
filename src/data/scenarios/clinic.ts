@@ -77,6 +77,12 @@ export const clinicBooking: Scenario = {
       'Events are useful for reminders and search indexing, but making the whole system event-driven makes the booking decision eventually consistent — exactly where MediSlot needs an immediate, strongly consistent answer.',
     serverless:
       'Functions could send reminders, but scattering the booking flow across functions makes transactions and connection pooling to the database hard during 7× spikes, and cold starts hurt the search latency target.',
+    'service-based':
+      'The closest distributed option: four coarse services (directory, availability & booking, admin, reminders) over one PostgreSQL keep the slot claim a local transaction. Still, it adds pipelines and deployables a team with no ops support does not need this quarter — modules give the same boundaries for less.',
+    'space-based':
+      'A 7× spike on ~30k bookings a day is well within one relational database plus a cache. A grid that writes to the database asynchronously would make “one slot, one patient” harder to guarantee, not easier.',
+    microkernel:
+      'Booking is not a small core with optional extensions — directory, calendars and booking are all central. Reminder channels can be small plug-ins inside the app, but that is a design detail, not the system style.',
   },
   hints: [
     'Two teams, one quarter: start with one Application container and a Module per capability.',

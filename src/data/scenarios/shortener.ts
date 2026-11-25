@@ -33,6 +33,12 @@ export const shortener: Scenario = {
     serverless: 'Plausible: edge functions + a KV store make redirects fast and cheap. Keep click recording async.',
     microservices: 'Two engineers, two capabilities — microservices would mostly add operational work.',
     'event-driven': 'Events are great for clicks, but a full event-driven microservice landscape is overkill for two people.',
+    'service-based':
+      'Two capabilities and two engineers do not make a handful of domain services; splitting Links and Analytics into deployables mostly adds operations.',
+    'space-based':
+      '10k rps of read-only redirects is a cache-and-CDN problem; processing units with a data grid, data pumps and writers are heavy machinery for a key lookup.',
+    microkernel:
+      'Nothing to plug in: resolving links is the whole product, and analytics belongs on an asynchronous side path, not as a plug-in inside the redirect process.',
   },
   hints: [
     'Redirect = key lookup. Put a cache in front of the store and most requests never hit the DB.',

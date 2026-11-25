@@ -82,6 +82,12 @@ export const observabilityRetrofit: Scenario = {
     'modular-monolith': 'Interesting thought, but re-architecting is out of scope. Observe what exists first.',
     monolith: 'Out of scope — keep the existing services.',
     serverless: 'Out of scope — keep the existing services.',
+    'service-based':
+      'Out of scope — the system already runs as four services with their own data. Renaming the style will not find the next three-hour outage; instrumentation will.',
+    'space-based':
+      'Out of scope — keep the existing services and make them observable.',
+    microkernel:
+      'Out of scope — keep the existing services and make them observable.',
   },
   starter: diagram(starterNodes, starterEdges),
   starterDecisions: { stack: { backend: 'spring-boot', frontend: 'angular', database: 'postgres', messaging: 'kafka' } },

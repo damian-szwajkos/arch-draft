@@ -96,7 +96,7 @@ export const apiGuard: Scenario = {
     { id: 'webhooks', label: 'Webhook delivery', description: 'Signed outbound notifications with retries' },
     { id: 'reporting', label: 'Reporting', description: 'Transaction listing, search and CSV exports' },
   ],
-  recommendedStyles: ['microservices', 'modular-monolith'],
+  recommendedStyles: ['microservices', 'modular-monolith', 'service-based'],
   styleFeedback: {
     microservices:
       'Good fit: a handful of services lets charges, reports and webhook delivery scale and fail independently — exactly the isolation the CTO asked for, without dozens of tiny services.',
@@ -108,6 +108,12 @@ export const apiGuard: Scenario = {
       'Events are useful for webhooks and the reporting read model, but charge creation is a synchronous request/response that must answer within 400 ms; going fully event-driven adds brokers and eventual consistency where merchants expect an immediate answer.',
     serverless:
       'Functions scale out, but a 40k req/s burst turns into thousands of concurrent invocations and a database connection storm; you still need a gateway with shared rate limits in front.',
+    'service-based':
+      'Good fit for seven engineers: three or four coarse services (charges, merchants & keys, reporting, webhooks) behind one gateway is the pragmatic middle ground. A shared database is normal in this style, but here it is exactly what failed — give reporting its own read store so an export cannot starve charge creation.',
+    'space-based':
+      'A data grid is for extreme, unpredictable concurrency on in-memory state. Fintly runs ~1,200 req/s, and the 40k req/s burst came from one abusive key — a shared per-key rate limit at the edge stops that far more cheaply than processing units and data pumps.',
+    microkernel:
+      'A plug-in core suits products customised per customer or market; Fintly’s problem is isolation between charges, reports and webhooks. Plug-ins inside one process would still share the same threads, pool and failure fate.',
   },
   hints: [
     'Every caller — dashboard, SDK and the merchants’ servers — should come through one front door that knows who they are.',

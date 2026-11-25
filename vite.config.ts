@@ -8,18 +8,19 @@ export default defineConfig({
   base: process.env.BASE_PATH ?? '/',
   plugins: [react(), tailwindcss()],
   build: {
-    // The content chunk is mostly scenario text (~160 kB gzipped) — expected to be large.
+    // Scenario text is the bulk of the bundle; it gets its own long-lived chunk.
     chunkSizeWarningLimit: 700,
     rollupOptions: {
       output: {
-        // Long-lived vendor chunks + a separate content chunk (scenarios, concepts, tech catalog).
+        // Long-lived vendor chunks + content chunks (scenarios / concept & tech catalog).
         manualChunks(id) {
           if (id.includes('node_modules')) {
             if (/[\\/](react|react-dom|react-router|react-router-dom|scheduler)[\\/]/.test(id)) return 'react'
             if (id.includes('@xyflow')) return 'xyflow'
             return 'vendor'
           }
-          if (id.includes('/src/data/')) return 'content'
+          if (id.includes('/src/data/scenarios/')) return 'scenarios'
+          if (id.includes('/src/data/')) return 'catalog'
         },
       },
     },

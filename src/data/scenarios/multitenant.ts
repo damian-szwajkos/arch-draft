@@ -139,7 +139,7 @@ export const tenantSaas: Scenario = {
     { id: 'invoicing', label: 'Invoicing', description: 'Invoices, corrections, contractors and KSeF submission (application plane)' },
     { id: 'imports', label: 'Bulk imports', description: 'Year-end CSV / ERP imports processed in the background' },
   ],
-  recommendedStyles: ['modular-monolith', 'microservices'],
+  recommendedStyles: ['modular-monolith', 'microservices', 'service-based'],
   styleFeedback: {
     'modular-monolith':
       'Great fit for nine engineers: one application plane with Invoicing and Imports modules, a small separate control plane, and background workers — tenancy is enforced in one place instead of in every service.',
@@ -151,6 +151,12 @@ export const tenantSaas: Scenario = {
       'A single undivided deployable tends to run imports inside the same process and the same connection pool as invoicing — exactly how one tenant’s year-end import stalled everyone — and gives no clear seam for routing banks to their own storage.',
     serverless:
       'Per-request functions make per-tenant cost attractive, but thousands of concurrent functions cause connection storms on a pooled Postgres, a 2M-row import must be chunked to fit execution limits, and cold starts hurt the p95 target — fine for import workers, a poor primary style.',
+    'service-based':
+      'Good fit for nine engineers: four coarse services (control plane, invoicing, imports, billing) with one pooled database for the 5,000 SMBs is exactly the “few services, not thirty” shape the brief asks for. Banks still get their own silo storage and keys, and imports run on workers so they cannot hog the shared pool.',
+    'space-based':
+      '300 req/s at month-end does not need an in-memory grid, and keeping invoices in a replicated grid makes tenant isolation and customer-managed keys much harder to prove to bank auditors.',
+    microkernel:
+      'White-label bank variants look like plug-ins, but the contracts are about dedicated storage, keys and data residency, not features. Per-tenant plug-ins in one process would not give the banks the isolation they signed for.',
   },
   hints: [
     'Split the platform in two: a control plane (who the tenants are, their plan, where their data lives) and an application plane (the invoices themselves).',

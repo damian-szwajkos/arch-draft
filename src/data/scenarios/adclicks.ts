@@ -132,6 +132,12 @@ export const adClicks: Scenario = {
       'That is today’s system: one database row updated per click, 40 minutes of lag on Black Friday, and no raw events to recompute from.',
     serverless:
       'A function is a fine lightweight ingest endpoint, but exactly-once windowed aggregation needs long-lived state and checkpoints. Stateless functions with per-invocation state lookups will not do that at 50k events/s.',
+    'service-based':
+      'A few coarse services over one shared database suit the Kotlin back-office (campaigns, invoices), but they put 50k events/s of counter updates back into a shared store — the same contention that left billing 40 minutes behind. The hot path needs a log, not a shared schema.',
+    'space-based':
+      'An in-memory grid could hold live spend per campaign, but you would be hand-building stream processing: replicated budget counters collide across two regions, and a grid is not the immutable, replayable record finance needs for disputes.',
+    microkernel:
+      'There is no stable core with optional features to bolt on here, just a high-volume event pipeline. A plug-in host would also put billing logic in the same process as the 50 ms ad path.',
   },
   hints: [
     'Separate the hot path (serve the ad, accept the click, redirect) from everything that counts money. Give every event its id before the first send (the ad server signs one into the click URL, or the SDK generates a UUID), so a retry carries the same id and ingest only verifies it and appends to a log.',

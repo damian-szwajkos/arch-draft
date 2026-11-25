@@ -170,7 +170,7 @@ export const integrationsHub: Scenario = {
     { id: 'retries', label: 'Retries & dead letters', description: 'Backoff schedules, retry topics, parked events' },
     { id: 'replay', label: 'Archive & replay', description: 'Raw event archive and re-delivery after fixes' },
   ],
-  recommendedStyles: ['modular-monolith', 'monolith'],
+  recommendedStyles: ['modular-monolith', 'monolith', 'microkernel'],
   styleFeedback: {
     'modular-monolith':
       'Best fit: one connector-runtime deployable with every connector as a module behind a shared interface gives 6 engineers one codebase, one library version and one pool to scale, while module boundaries stop 150 integrations from tangling.',
@@ -182,6 +182,12 @@ export const integrationsHub: Scenario = {
       'Events are the right transport between ingestion and delivery, but a fleet of independently deployed consumers per destination is the sprawl you are removing — keep the log, consolidate the consumers.',
     serverless:
       'One function per step with S3 between steps is what made the sister pipeline so expensive: every hop pays invocations, storage requests and re-serialisation. A steady 25k events/s is far cheaper on a long-running worker pool.',
+    'service-based':
+      'Far better than 150 services, but even four or five coarse deployables are more than six engineers without ops need. The heart of the fix is one connector runtime, which a plug-in or modular design expresses more directly.',
+    'space-based':
+      'This style is for spiky, highly concurrent users on shared in-memory state. Syncly has a steady 25k events/s that needs a durable log and replay — a data grid would grow a bill that has to shrink by two-thirds.',
+    microkernel:
+      'Excellent fit: a connector runtime is a textbook microkernel. The core consumes the log and owns retries, rate limits and credentials; each of the 150 destinations is a plug-in behind one connector contract, so a new destination is a plug-in, not a new deployable — and there is one library version again.',
   },
   starter: diagram(starterNodes, starterEdges),
   starterDecisions: {

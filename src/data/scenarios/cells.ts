@@ -255,6 +255,12 @@ export const cellPlatform: Scenario = {
       'A plain monolith on one shared stack is exactly what failed twice last quarter. Copy the app into cells and give it module boundaries — that is the modular-monolith option.',
     serverless:
       'Per-request functions do not fix the shared database, and a 100× spike from one shop would still exhaust shared concurrency and connection limits for everyone.',
+    'service-based':
+      'Coarse services sharing one database per cell would work technically, but the brief says to keep the Rails codebase and copy it into every cell. Splitting it into services now multiplies the moving parts in every cell without shrinking the blast radius.',
+    'space-based':
+      'An in-memory grid absorbs a flash sale, but one grid shared by many shops is a new shared failure domain, and replication does not respect the 10% rule. Cells plus per-shop limits contain a 100× drop instead.',
+    microkernel:
+      'Themes and shop apps are plug-in-like, but they do not touch the real problem: one deploy or one overload reaching all 400,000 shops. Isolation comes from routing shops into cells, not from a plug-in core.',
   },
   hints: [
     'Ask: what is the smallest unit a failure should be confined to? Group everything one shop needs — app, database, cache, queue — into a Boundary zone and call it a cell.',

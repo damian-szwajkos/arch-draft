@@ -1,4 +1,4 @@
-import { Activity, ArrowRight, Blocks, ChartCandlestick, Clock, CodeXml, GraduationCap, Landmark, LayoutGrid, Link2, MessageCircle, MousePointerClick, ShieldCheck, ShoppingBag, Stethoscope, Ticket, Truck, type LucideIcon } from 'lucide-react'
+import { Activity, ArrowRight, Blocks, CarFront, ChartCandlestick, Clock, CodeXml, GraduationCap, Landmark, LayoutGrid, Link2, MessageCircle, MousePointerClick, ShieldCheck, ShoppingBag, Stethoscope, Ticket, Truck, Wallet, type LucideIcon } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import type { Scenario } from '../engine/types'
 import type { ProgressRecord } from '../lib/storage'
@@ -20,6 +20,8 @@ export const INDUSTRY_ICON: Record<string, LucideIcon> = {
   'Data & integrations': Blocks,
   'Capital markets': ChartCandlestick,
   AdTech: MousePointerClick,
+  'HR & payroll': Wallet,
+  'Mobility & rental': CarFront,
 }
 
 export function ScenarioCard({ s, progress }: { s: Scenario; progress?: ProgressRecord }) {

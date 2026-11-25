@@ -304,6 +304,12 @@ export const notifyHub: Scenario = {
       'This is today’s design: emails are sent inside web requests, so one digest blast slows the whole product and delays login codes.',
     serverless:
       'Good fit for a small AWS team: SQS-triggered Lambdas per lane, with maximum concurrency set per provider to pace sends and a separate queue + function for OTP. Watch cold starts on the priority lane (provisioned concurrency) and keep preferences behind one API.',
+    'service-based':
+      'One or two coarse notification services fit the “only notification code moves out” rule, but this style is about splitting a whole application into domain services. The Rails app stays as it is; what matters is that the new platform is fed by events.',
+    'space-based':
+      'Digest bursts of ~1.5k/s are a queue-depth problem, not a shared in-memory state problem. Queues absorb the blast and pacing respects provider limits; a data grid adds nothing a managed queue does not already do.',
+    microkernel:
+      'Channels and templates are naturally plug-in-like — email, push and SMS behind one sender contract, new types added as configuration. That is a good internal design for the platform, but it still has to be a separate deployable fed by events.',
   },
   starter,
   starterDecisions: {

@@ -11,7 +11,7 @@ export interface Tech {
   ecosystem?: string
 }
 
-const BACKEND: ComponentKind[] = ['service', 'monolith', 'module', 'worker', 'bff']
+const BACKEND: ComponentKind[] = ['service', 'monolith', 'module', 'plugin', 'worker', 'bff']
 
 export const TECH: Tech[] = [
   // Frontend
@@ -31,6 +31,10 @@ export const TECH: Tech[] = [
   { id: 'ionic', name: 'Ionic', kinds: ['mobile-app'], traits: ['cross-platform', 'hybrid'], blurb: 'Web technologies (Angular/React/Vue) wrapped as native apps.' },
 
   // Backend frameworks
+  { id: 'pf4j', name: 'PF4J', kinds: ['plugin', 'monolith'], traits: ['jvm', 'plugins', 'extension-points'], ecosystem: 'jvm', blurb: 'Plugin Framework for Java — lightweight plug-in loading with extension points.' },
+  { id: 'osgi', name: 'OSGi (Apache Felix)', kinds: ['plugin', 'monolith'], traits: ['jvm', 'plugins', 'hot-reload', 'versioned-contracts'], ecosystem: 'jvm', blurb: 'Module system with versioned bundles that load and unload at runtime.' },
+  { id: 'drools', name: 'Drools', kinds: ['plugin', 'module', 'service'], traits: ['jvm', 'rules-engine', 'dmn'], ecosystem: 'jvm', blurb: 'Business rules engine (DRL/DMN) — rules authored and versioned outside the core code.' },
+  { id: 'extism', name: 'Extism (WebAssembly)', kinds: ['plugin'], traits: ['wasm', 'sandbox', 'plugins', 'polyglot'], blurb: 'Sandboxed WebAssembly plug-ins written in any language, safe to run third-party code.' },
   { id: 'spring-boot', name: 'Spring Boot', kinds: BACKEND, traits: ['jvm'], ecosystem: 'jvm', blurb: 'The JVM workhorse: mature ecosystem (Spring Data, Security, Cloud, Modulith).' },
   { id: 'jakarta-ee', name: 'Jakarta EE (WildFly / WebLogic)', kinds: BACKEND, traits: ['jvm', 'app-server'], ecosystem: 'jvm', blurb: 'Classic Java EE application servers — common in legacy enterprise monoliths.' },
   { id: 'quarkus', name: 'Quarkus', kinds: BACKEND, traits: ['jvm', 'fast-startup'], ecosystem: 'jvm', blurb: 'Kubernetes-native Java with fast startup and low memory (GraalVM).' },
@@ -101,7 +105,9 @@ export const TECH: Tech[] = [
   { id: 'redis', name: 'Redis', kinds: ['cache', 'broker'], traits: ['cache', 'ttl', 'geo', 'pubsub', 'atomic', 'sorted-sets'], blurb: 'In-memory data structures: cache, TTL holds, rate limits, geo, leaderboards.' },
   { id: 'valkey', name: 'Valkey', kinds: ['cache'], traits: ['cache', 'ttl', 'geo', 'atomic', 'sorted-sets'], blurb: 'Open-source Redis fork.' },
   { id: 'memcached', name: 'Memcached', kinds: ['cache'], traits: ['cache', 'ttl'], blurb: 'Simple, fast, multi-threaded key-value cache.' },
-  { id: 'hazelcast', name: 'Hazelcast', kinds: ['cache'], traits: ['cache', 'ttl', 'jvm', 'distributed'], blurb: 'Distributed in-memory data grid for the JVM.' },
+  { id: 'hazelcast', name: 'Hazelcast', kinds: ['cache'], traits: ['cache', 'ttl', 'jvm', 'distributed', 'in-memory-data-grid', 'replicated'], blurb: 'Distributed in-memory data grid for the JVM.' },
+  { id: 'apache-ignite', name: 'Apache Ignite', kinds: ['cache'], traits: ['cache', 'ttl', 'distributed', 'in-memory-data-grid', 'replicated', 'sql', 'jvm'], blurb: 'In-memory data grid with SQL, compute grid and native persistence.' },
+  { id: 'apache-geode', name: 'Apache Geode', kinds: ['cache'], traits: ['cache', 'ttl', 'distributed', 'in-memory-data-grid', 'replicated', 'jvm'], blurb: 'Data grid behind GemFire — the classic engine for space-based architectures.' },
   // Search
   { id: 'elasticsearch', name: 'Elasticsearch', kinds: ['search', 'logging'], traits: ['full-text'], blurb: 'Distributed search & analytics engine.' },
   { id: 'opensearch', name: 'OpenSearch', kinds: ['search', 'logging'], traits: ['full-text'], blurb: 'Open-source fork of Elasticsearch.' },
@@ -232,7 +238,7 @@ export const STACK_SLOTS: {
 }[] = [
   { key: 'frontend', label: 'Web frontend', kinds: ['web-app'], hint: 'React, Angular, Vue…' },
   { key: 'mobile', label: 'Mobile', kinds: ['mobile-app'], hint: 'Flutter, React Native…' },
-  { key: 'backend', label: 'Backend framework', kinds: ['service', 'monolith', 'module', 'worker', 'bff'], hint: 'Spring Boot, NestJS, Go…' },
+  { key: 'backend', label: 'Backend framework', kinds: ['service', 'monolith', 'module', 'plugin', 'worker', 'bff'], hint: 'Spring Boot, NestJS, Go…' },
   { key: 'database', label: 'Primary database', kinds: ['relational-db', 'document-db'], hint: 'PostgreSQL, MongoDB…' },
   { key: 'messaging', label: 'Messaging', kinds: ['broker'], hint: 'Kafka, RabbitMQ…' },
   { key: 'cache', label: 'Cache', kinds: ['cache'], hint: 'Redis, Memcached…' },

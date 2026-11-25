@@ -147,6 +147,12 @@ export const exchangeEngine: Scenario = {
       'This is the design that stalled for 40 seconds: matching, persistence and reporting share one process and one database, so contention destroys both fairness and latency.',
     serverless:
       'Cold starts, per-invocation state and millisecond-scale invocation overhead make it impossible to keep an in-memory order book or meet a sub-millisecond p99.',
+    'service-based':
+      'Coarse services around a shared database is close to the design that stalled: matching that locked order rows in PostgreSQL. The order hot path must not touch a database at all.',
+    'space-based':
+      'In-memory state is right, a replicated grid is not: matching needs one deterministic writer per instrument, and replicating the book between processing units invites collisions and breaks strict price-time order. Use a sequenced journal feeding a single-writer engine.',
+    microkernel:
+      'Order types or risk rules could be plug-ins, but plug-in dispatch inside the matching process adds indirection to a sub-millisecond path and does nothing to keep market data, clearing or surveillance away from it.',
   },
   hints: [
     'Follow one order from click to acknowledgement. Who authenticates and risk-checks it, who decides its place in the queue, and who matches it? Give each step its own owner.',

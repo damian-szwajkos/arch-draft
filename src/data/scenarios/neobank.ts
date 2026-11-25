@@ -52,6 +52,12 @@ export const neobank: Scenario = {
     'modular-monolith': 'A defensible first step for one team, but six squads, separate PCI scope and independent scaling of card auth favour separate services here.',
     monolith: 'The current monolith is exactly what blocks six teams today.',
     serverless: 'Cold starts and per-invocation limits make 150 ms card authorisations and long-running sagas risky.',
+    'service-based':
+      'Fewer, coarser services is tempting, but a shared database would pull the ledger and PCI-scoped card data into one schema and one blast radius. With six squads deploying independently and audited isolation, each service needs its own data — which is microservices.',
+    'space-based':
+      'In-memory balances with write-behind persistence break the core rule: money must be durably recorded before you say yes. 400 tx/s does not justify that trade.',
+    microkernel:
+      'Card products or transfer rails can be plug-ins inside one service, but the bank is several equally central domains that six squads must release separately.',
   },
   hints: [
     'Give the Ledger its own relational database. Nobody else touches it — they ask the Ledger or listen to its events.',

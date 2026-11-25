@@ -49,6 +49,12 @@ export const delivery: Scenario = {
     'modular-monolith': 'Location ingest at 2.5k msg/s and dispatch have very different scaling needs from menus; separate deployables pay off here.',
     monolith: 'The polling monolith is the problem we are solving.',
     serverless: 'Per-message functions for 2.5k GPS pings per second get expensive and add latency; long-lived WebSockets do not fit.',
+    'service-based':
+      'A few coarse services over one shared database would bring back the problem you are solving: 2.5k GPS pings a second and dispatch hitting the same store as menus and orders. Five squads and very different load profiles favour separate data and events.',
+    'space-based':
+      'Courier positions are hot in-memory data, but 2.5k msg/s is comfortably handled by a geo cache fed from a stream. Processing units with a replicated grid, data pumps and writers are more machinery than this load needs.',
+    microkernel:
+      'Ordering, dispatch and tracking are all core capabilities that scale differently; none is an optional add-on. A plug-in host would put them back into one process.',
   },
   hints: [
     'You have three distinct clients — draw each one.',

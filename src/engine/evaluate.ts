@@ -3,11 +3,14 @@ import { COMPUTE_KINDS, Graph } from './graph'
 import type { ArchStyle, Check, CheckResult, Decisions, Diagram, Evaluation, LintIssue, Scenario } from './types'
 
 const STYLE_NAMES: Record<ArchStyle, string> = {
-  monolith: 'Monolith',
+  monolith: 'Layered monolith',
   'modular-monolith': 'Modular monolith',
   microservices: 'Microservices',
   'event-driven': 'Event-driven microservices',
   serverless: 'Serverless',
+  'service-based': 'Service-based',
+  'space-based': 'Space-based',
+  microkernel: 'Microkernel (plug-in)',
 }
 export { STYLE_NAMES }
 
@@ -54,7 +57,7 @@ export const styleConsistencyCheck: Check = {
   title: 'Diagram matches the declared style',
   category: 'bonus',
   why: 'A decision that is not reflected in the design is just a wish. Reviewers will compare your ADR with the diagram.',
-  hint: 'Modular monolith → one Application with Modules inside. Microservices → several independent services.',
+  hint: 'Modular monolith → one Application with Modules inside. Microkernel → a core Application with Plug-ins. Service-based → 4–12 coarse services. Microservices → several independent services.',
   concepts: ['modular-monolith', 'microservices'],
   test: (g) => {
     const style = g.decisions.style
@@ -78,6 +81,19 @@ export const styleConsistencyCheck: Check = {
         }
       case 'serverless':
         return { pass: g.count('function') >= 2, detail: 'Use serverless functions for the compute.' }
+      case 'service-based':
+        return {
+          pass: services >= 4 && services <= 12,
+          detail: services < 4 ? 'Service-based architecture uses a handful (≈4–12) of coarse-grained domain services.' : services > 12 ? `${services} services — that is fine-grained microservices, not service-based.` : undefined,
+        }
+      case 'space-based': {
+        const ok = services >= 1 && g.has('cache') && g.has('broker') && g.has('worker')
+        return { pass: ok, detail: ok ? undefined : 'Space-based needs processing units (services) with an in-memory data grid (cache), data pumps (broker) and data writers (workers).' }
+      }
+      case 'microkernel': {
+        const plugins = g.count('plugin')
+        return { pass: monoliths.length >= 1 && plugins >= 2, detail: plugins < 2 ? 'Draw a core Application with at least two Plug-ins inside it.' : monoliths.length < 1 ? 'Plug-ins need a core Application to plug into.' : undefined }
+      }
     }
   },
 }
@@ -119,6 +135,8 @@ export const noSharedDbCheck: Check = {
   concepts: ['database-per-service'],
   test: (g) => {
     const shared = g.sharedDatabases()
+    if (shared.length && g.decisions.style === 'service-based')
+      return { pass: true, detail: 'Service-based architecture shares a database on purpose — keep schema ownership per domain service.' }
     return {
       pass: shared.length === 0,
       detail: shared.length ? shared.map((s) => `${s.store.label} ← ${s.services.map((x) => x.label).join(', ')}`).join('; ') : undefined,
@@ -155,7 +173,7 @@ export function lint(g: Graph): LintIssue[] {
   const orphans = g.nodes.filter((n) => {
     if (n.kind === 'zone' || n.kind === 'monolith') return false
     if (g.neighbours(n.id).length) return false
-    if (n.kind === 'module' && n.parentId) return false
+    if ((n.kind === 'module' || n.kind === 'plugin') && n.parentId) return false
     return true
   })
   if (orphans.length)
@@ -164,18 +182,18 @@ export function lint(g: Graph): LintIssue[] {
       message: `${orphans.length} component${orphans.length > 1 ? 's are' : ' is'} not connected to anything.`,
       nodeIds: orphans.map((o) => o.id),
     })
-  const ownerless = g.ofKind('service', 'module').filter((n) => n.domains.length === 0)
+  const ownerless = g.ofKind('service', 'module', 'plugin').filter((n) => n.domains.length === 0)
   if (ownerless.length)
     issues.push({
       id: 'ownerless',
       message: `${ownerless.length} service/module${ownerless.length > 1 ? 's have' : ' has'} no business capability assigned.`,
       nodeIds: ownerless.map((o) => o.id),
     })
-  const strayModules = g.ofKind('module').filter((m) => g.parent(m)?.kind !== 'monolith')
+  const strayModules = g.ofKind('module', 'plugin').filter((m) => g.parent(m)?.kind !== 'monolith')
   if (strayModules.length)
     issues.push({
       id: 'stray-modules',
-      message: 'Modules should live inside an Application (drag them into the container).',
+      message: 'Modules and plug-ins should live inside an Application (drag them into the container).',
       nodeIds: strayModules.map((m) => m.id),
     })
   const godService = g.ofKind('service').find((n) => n.domains.length >= 4)
@@ -186,7 +204,7 @@ export function lint(g: Graph): LintIssue[] {
       nodeIds: [godService.id],
     })
   const computeNoTelemetry = g.has('otel-collector', 'logging', 'metrics', 'tracing')
-    ? g.ofKind(...COMPUTE_KINDS).filter((n) => n.kind !== 'module' && !g.instrumented().includes(n))
+    ? g.ofKind(...COMPUTE_KINDS).filter((n) => n.kind !== 'module' && n.kind !== 'plugin' && !g.instrumented().includes(n))
     : []
   if (computeNoTelemetry.length)
     issues.push({

@@ -19,6 +19,11 @@ import { mobilePayScheme } from './mobilepay'
 import { cellPlatform } from './cells'
 import { exchangeEngine } from './exchange'
 import { adClicks } from './adclicks'
+import { payrollPlugins } from './payroll'
+import { vanRental } from './vanrental'
+import { labResults } from './labresults'
+import { fleetReporting } from './reporting'
+import { liveAuction } from './auction'
 
 export const SCENARIOS: Scenario[] = [
   // Beginner
@@ -28,6 +33,7 @@ export const SCENARIOS: Scenario[] = [
   notifyHub,
   apiGuard,
   retailBff,
+  payrollPlugins,
   // Intermediate
   observabilityRetrofit,
   learning,
@@ -37,6 +43,9 @@ export const SCENARIOS: Scenario[] = [
   insurerStrangler,
   tenantSaas,
   integrationsHub,
+  vanRental,
+  labResults,
+  fleetReporting,
   // Advanced
   tickets,
   neobank,
@@ -44,6 +53,7 @@ export const SCENARIOS: Scenario[] = [
   cellPlatform,
   exchangeEngine,
   adClicks,
+  liveAuction,
 ]
 
 export const SCENARIO_BY_ID = Object.fromEntries(SCENARIOS.map((s) => [s.id, s])) as Record<string, Scenario>

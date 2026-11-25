@@ -41,13 +41,19 @@ export const learning: Scenario = {
     { id: 'progress', label: 'Progress', description: 'Lesson completion tracking' },
     { id: 'certificates', label: 'Certificates', description: 'Completion certificates' },
   ],
-  recommendedStyles: ['modular-monolith', 'microservices', 'event-driven'],
+  recommendedStyles: ['modular-monolith', 'microservices', 'event-driven', 'service-based'],
   styleFeedback: {
     'modular-monolith': 'Pragmatic: a modular core for business capabilities, plus a separately scaled media pipeline.',
     microservices: 'Works with 3 teams; just make sure the media pipeline is isolated and asynchronous.',
     'event-driven': 'Good fit for media processing and certificate issuing.',
     monolith: 'Video processing inside the monolith is exactly what keeps taking the app down.',
     serverless: 'Transcoding long videos can exceed function limits; containers/workers fit better.',
+    'service-based':
+      'Good fit for three teams and a small platform team: a few coarse services (catalog & enrolment, payments, progress, media pipeline) that may share a database where convenient. Give the 2k writes/s progress heartbeats their own store and keep transcoding asynchronous so it never touches the rest.',
+    'space-based':
+      'The 20k concurrent viewers are served by the CDN, not your servers, and the only hot write path — progress heartbeats — fits a fast key-value store. An in-memory data grid is not justified.',
+    microkernel:
+      'Plug-ins could model optional features such as quiz types or payment providers, but the real risk — transcoding taking the app down — is solved by moving media out of the process, which a plug-in core keeps inside it.',
   },
   hints: [
     'Give clients a pre-signed URL so they upload straight to object storage.',
